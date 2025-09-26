@@ -692,6 +692,54 @@ app.get('/api/service-requests', (req, res) => {
   });
 });
 
+// Update service request status (approve/reject/update)
+app.put('/api/service-requests/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes, estimatedHours, actualHours, budget, deadline } = req.body;
+    
+    console.log(`Updating service request ${id} with status: ${status}`);
+    
+    // Find the service request
+    const requestIndex = serviceRequests.findIndex(req => req.id === id);
+    if (requestIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service request not found'
+      });
+    }
+    
+    // Update the service request
+    const updatedRequest = {
+      ...serviceRequests[requestIndex],
+      status: status || serviceRequests[requestIndex].status,
+      adminNotes: adminNotes || serviceRequests[requestIndex].adminNotes,
+      estimatedHours: estimatedHours || serviceRequests[requestIndex].estimatedHours,
+      actualHours: actualHours || serviceRequests[requestIndex].actualHours,
+      budget: budget || serviceRequests[requestIndex].budget,
+      deadline: deadline || serviceRequests[requestIndex].deadline,
+      updatedAt: new Date().toISOString()
+    };
+    
+    serviceRequests[requestIndex] = updatedRequest;
+    
+    console.log(`Service request ${id} updated successfully:`, updatedRequest);
+    
+    res.json({
+      success: true,
+      data: updatedRequest,
+      message: `Service request ${id} updated successfully`
+    });
+  } catch (error) {
+    console.error('Update service request error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update service request',
+      error: error.message
+    });
+  }
+});
+
 // Service requests stats overview
 app.get('/api/service-requests/stats/overview', (req, res) => {
   res.json({
