@@ -75,6 +75,20 @@ app.get('/api/test', (req, res) => {
 // Service requests endpoint - fetch from database
 app.get('/api/service-requests/public', async (req, res) => {
   try {
+    // Check if table exists first
+    const [tableCheck] = await mysqlConnection.execute(
+      'SHOW TABLES LIKE "service_requests"'
+    );
+    
+    if (tableCheck.length === 0) {
+      console.log('service_requests table does not exist, returning empty data');
+      return res.json({ 
+        success: true, 
+        data: [], 
+        message: 'No services available yet' 
+      });
+    }
+    
     const [rows] = await mysqlConnection.execute(
       'SELECT * FROM service_requests WHERE status = "pending" OR status = "in-progress" ORDER BY createdAt DESC'
     );
@@ -98,6 +112,19 @@ app.get('/api/service-requests/public', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    // Check if users table exists
+    const [tableCheck] = await mysqlConnection.execute(
+      'SHOW TABLES LIKE "users"'
+    );
+    
+    if (tableCheck.length === 0) {
+      console.log('users table does not exist');
+      return res.status(500).json({
+        success: false,
+        message: 'Database not properly set up'
+      });
+    }
     
     const [rows] = await mysqlConnection.execute(
       'SELECT * FROM users WHERE email = ? AND password = ?',
@@ -142,6 +169,19 @@ app.post('/api/auth/login', async (req, res) => {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, company, phone } = req.body;
+    
+    // Check if users table exists
+    const [tableCheck] = await mysqlConnection.execute(
+      'SHOW TABLES LIKE "users"'
+    );
+    
+    if (tableCheck.length === 0) {
+      console.log('users table does not exist');
+      return res.status(500).json({
+        success: false,
+        message: 'Database not properly set up'
+      });
+    }
     
     // Check if user already exists
     const [existingRows] = await mysqlConnection.execute(
@@ -206,6 +246,95 @@ app.post('/api/contact', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to submit contact form',
+      error: error.message
+    });
+  }
+});
+
+// Messaging endpoints for live chat
+app.post('/api/messaging/public/send', async (req, res) => {
+  try {
+    const { content, senderName, senderEmail, messageType = 'text' } = req.body;
+    
+    // Check if messages table exists
+    const [tableCheck] = await mysqlConnection.execute(
+      'SHOW TABLES LIKE "messages"'
+    );
+    
+    if (tableCheck.length === 0) {
+      console.log('messages table does not exist, creating basic response');
+      return res.json({
+        success: true,
+        message: 'Message received (table not set up yet)',
+        data: {
+          id: Date.now(),
+          content,
+          senderName,
+          senderEmail,
+          messageType,
+          createdAt: new Date().toISOString()
+        }
+      });
+    }
+    
+    // Insert message into database
+    const [result] = await mysqlConnection.execute(
+      'INSERT INTO messages (content, senderName, senderEmail, messageType, senderId, conversationId) VALUES (?, ?, ?, ?, ?, ?)',
+      [content, senderName, senderEmail, messageType, null, null]
+    );
+    
+    res.json({
+      success: true,
+      message: 'Message sent successfully',
+      data: {
+        id: result.insertId,
+        content,
+        senderName,
+        senderEmail,
+        messageType,
+        createdAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Messaging error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send message',
+      error: error.message
+    });
+  }
+});
+
+// Get public messages
+app.get('/api/messaging/public/messages', async (req, res) => {
+  try {
+    // Check if messages table exists
+    const [tableCheck] = await mysqlConnection.execute(
+      'SHOW TABLES LIKE "messages"'
+    );
+    
+    if (tableCheck.length === 0) {
+      return res.json({
+        success: true,
+        data: [],
+        message: 'No messages table found'
+      });
+    }
+    
+    const [rows] = await mysqlConnection.execute(
+      'SELECT * FROM messages WHERE senderId IS NULL ORDER BY createdAt DESC LIMIT 50'
+    );
+    
+    res.json({
+      success: true,
+      data: rows,
+      message: 'Messages retrieved successfully'
+    });
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching messages',
       error: error.message
     });
   }
