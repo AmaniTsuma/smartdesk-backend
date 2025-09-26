@@ -35,16 +35,27 @@ app.get('/api/service-requests/public', (req, res) => {
 });
 
 app.post('/api/messaging/public/send', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Message sent successfully',
-    data: {
-      id: Date.now(),
-      content: req.body.content,
-      senderName: req.body.senderName,
-      createdAt: new Date().toISOString()
-    }
-  });
+  try {
+    console.log('Received message:', req.body);
+    res.json({
+      success: true,
+      message: 'Message sent successfully',
+      data: {
+        id: Date.now(),
+        content: req.body.content || 'No content',
+        senderName: req.body.senderName || 'Anonymous',
+        senderEmail: req.body.senderEmail || 'No email',
+        createdAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Messaging error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send message',
+      error: error.message
+    });
+  }
 });
 
 // 404 handler
