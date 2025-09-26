@@ -106,17 +106,148 @@ app.get('/api/service-requests/public', (req, res) => {
   });
 });
 
-app.post('/api/messaging/public/send', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Message sent successfully',
-    data: {
-      id: Date.now(),
-      content: req.body.content || 'No content',
-      senderName: req.body.senderName || 'Anonymous',
-      createdAt: new Date().toISOString()
+// Auth endpoints
+app.post('/api/auth/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    console.log('Login attempt:', { email, password: password ? '***' : 'missing' });
+    
+    // Simple hardcoded admin login for testing
+    if (email === 'amanijohn29@yahoo.com' && password === 'Amani@2025') {
+      res.json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          user: {
+            id: 'admin-1',
+            email: 'amanijohn29@yahoo.com',
+            name: 'Admin User',
+            role: 'admin'
+          },
+          token: 'mock-jwt-token-' + Date.now()
+        }
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
     }
-  });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Login failed',
+      error: error.message
+    });
+  }
+});
+
+app.post('/api/auth/register', (req, res) => {
+  try {
+    const { email, password, name } = req.body;
+    
+    console.log('Register attempt:', { email, name });
+    
+    res.json({
+      success: true,
+      message: 'Registration successful',
+      data: {
+        user: {
+          id: 'user-' + Date.now(),
+          email: email,
+          name: name,
+          role: 'client'
+        },
+        token: 'mock-jwt-token-' + Date.now()
+      }
+    });
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Registration failed',
+      error: error.message
+    });
+  }
+});
+
+// Messaging endpoints
+app.post('/api/messaging/public/send', (req, res) => {
+  try {
+    console.log('Received message:', req.body);
+    
+    res.json({
+      success: true,
+      message: 'Message sent successfully',
+      data: {
+        id: Date.now(),
+        content: req.body.content || 'No content',
+        senderName: req.body.senderName || 'Anonymous',
+        senderEmail: req.body.senderEmail || 'No email',
+        createdAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Messaging error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send message',
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/messaging/public/messages', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: [
+        {
+          id: 1,
+          content: 'Welcome to Smart Desk Solutions! How can we help you today?',
+          senderName: 'Support Team',
+          senderEmail: 'support@smartdesk.solutions',
+          createdAt: new Date().toISOString()
+        }
+      ],
+      message: 'Messages retrieved successfully'
+    });
+  } catch (error) {
+    console.error('Get messages error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve messages',
+      error: error.message
+    });
+  }
+});
+
+// Contact endpoint
+app.post('/api/contact', (req, res) => {
+  try {
+    console.log('Contact form submission:', req.body);
+    
+    res.json({
+      success: true,
+      message: 'Contact form submitted successfully',
+      data: {
+        id: Date.now(),
+        name: req.body.name || 'Anonymous',
+        email: req.body.email || 'No email',
+        message: req.body.message || 'No message',
+        createdAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Contact error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to submit contact form',
+      error: error.message
+    });
+  }
 });
 
 // 404 handler
