@@ -114,17 +114,47 @@ app.post('/api/auth/login', (req, res) => {
     
     console.log('Login attempt:', { email, password: password ? '***' : 'missing' });
     
-    // Simple hardcoded admin login for testing
-    if (email === 'amanijohn29@yahoo.com' && password === 'Amani@2025') {
+    // Real users from database
+    const users = [
+      {
+        id: 'admin-1',
+        email: 'info@smartdesk.solutions',
+        password: 'admin123', // Plain text for testing
+        firstName: 'Smart Desk',
+        lastName: 'Admin',
+        role: 'admin'
+      },
+      {
+        id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+        email: 'amanijohntsuma1@gmail.com',
+        password: 'amani123', // Plain text for testing
+        firstName: 'Amani John',
+        lastName: 'Tsuma',
+        role: 'client'
+      },
+      {
+        id: '29e8fe0c-dc5a-4897-8e9f-4afdcfcf808d',
+        email: 'admin@smartdesk.com',
+        password: 'admin123', // Plain text for testing
+        firstName: 'Admin',
+        lastName: 'User',
+        role: 'admin'
+      }
+    ];
+    
+    // Find user by email
+    const user = users.find(u => u.email === email);
+    
+    if (user && user.password === password) {
       res.json({
         success: true,
         message: 'Login successful',
         data: {
           user: {
-            id: 'admin-1',
-            email: 'amanijohn29@yahoo.com',
-            name: 'Admin User',
-            role: 'admin'
+            id: user.id,
+            email: user.email,
+            name: `${user.firstName} ${user.lastName}`,
+            role: user.role
           },
           token: 'mock-jwt-token-' + Date.now()
         }
