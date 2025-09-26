@@ -72,6 +72,33 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'MySQL API is working!' });
 });
 
+// Database test endpoint
+app.get('/api/db-test', async (req, res) => {
+  try {
+    // Test basic connection
+    const [connectionTest] = await mysqlConnection.execute('SELECT 1 as test');
+    
+    // Check what tables exist
+    const [tables] = await mysqlConnection.execute('SHOW TABLES');
+    
+    res.json({
+      success: true,
+      message: 'Database connection working',
+      data: {
+        connectionTest: connectionTest[0],
+        tables: tables.map(t => Object.values(t)[0])
+      }
+    });
+  } catch (error) {
+    console.error('Database test error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Database connection failed',
+      error: error.message
+    });
+  }
+});
+
 // Service requests endpoint - fetch from database
 app.get('/api/service-requests/public', async (req, res) => {
   try {
