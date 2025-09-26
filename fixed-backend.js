@@ -594,6 +594,19 @@ app.get('/api/service-requests', (req, res) => {
   });
 });
 
+// Service requests stats overview
+app.get('/api/service-requests/stats/overview', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      total: 6,
+      available: 6,
+      inProgress: 0,
+      completed: 0
+    }
+  });
+});
+
 // Messaging endpoints
 app.get('/api/messaging/admin/conversations', (req, res) => {
   if (!currentUser) {
@@ -603,9 +616,33 @@ app.get('/api/messaging/admin/conversations', (req, res) => {
     });
   }
 
+  // Return sample conversations including contact form submissions
+  const conversations = [
+    {
+      id: 'contact-1',
+      type: 'contact_form',
+      senderName: 'Contact Form',
+      senderEmail: 'contact@smartdesk.solutions',
+      lastMessage: 'New contact form submission received',
+      unreadCount: 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: 'live-chat-1',
+      type: 'live_chat',
+      senderName: 'Live Chat User',
+      senderEmail: 'user@example.com',
+      lastMessage: 'Hello, I need help with my services',
+      unreadCount: 0,
+      createdAt: new Date(Date.now() - 3600000).toISOString(),
+      updatedAt: new Date(Date.now() - 1800000).toISOString()
+    }
+  ];
+
   res.json({
     success: true,
-    data: []
+    data: conversations
   });
 });
 
@@ -620,6 +657,18 @@ app.get('/api/messaging/unread-count', (req, res) => {
   res.json({
     success: true,
     data: {
+      unreadCount: 0
+    }
+  });
+});
+
+// Mock Socket.IO connection status
+app.get('/api/messaging/status', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      status: 'connected',
+      online: true,
       unreadCount: 0
     }
   });
@@ -661,11 +710,39 @@ app.get('/socket.io/', (req, res) => {
 
 // Contact endpoint
 app.post('/api/contact', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Contact form submitted successfully',
-    data: { id: Date.now(), ...req.body, createdAt: new Date().toISOString() }
-  });
+  try {
+    console.log('Contact form submission:', req.body);
+    
+    // Create a message/conversation from contact form
+    const contactMessage = {
+      id: 'contact-' + Date.now(),
+      content: `New contact form submission:\n\nName: ${req.body.name || 'N/A'}\nEmail: ${req.body.email || 'N/A'}\nSubject: ${req.body.subject || 'N/A'}\nMessage: ${req.body.message || 'N/A'}`,
+      senderName: req.body.name || 'Contact Form',
+      senderEmail: req.body.email || 'contact@smartdesk.solutions',
+      createdAt: new Date().toISOString(),
+      type: 'contact_form'
+    };
+    
+    console.log('Contact message created:', contactMessage);
+    
+    res.json({
+      success: true,
+      message: 'Contact form submitted successfully',
+      data: { 
+        id: Date.now(), 
+        ...req.body, 
+        createdAt: new Date().toISOString(),
+        messageId: contactMessage.id
+      }
+    });
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to submit contact form',
+      error: error.message
+    });
+  }
 });
 
 // 404 handler
