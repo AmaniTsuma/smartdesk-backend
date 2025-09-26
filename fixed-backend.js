@@ -343,6 +343,58 @@ app.get('/api/auth/users', async (req, res) => {
   }
 });
 
+// Delete user endpoint
+app.delete('/api/auth/users/:id', (req, res) => {
+  try {
+    if (!currentUser) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access denied. Please log in.'
+      });
+    }
+
+    const { id } = req.params;
+    console.log(`Attempting to delete user with ID: ${id}`);
+
+    // Find the user to delete
+    const userIndex = registeredUsers.findIndex(user => user.id === id);
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const userToDelete = registeredUsers[userIndex];
+    
+    // Prevent deleting the current logged-in user
+    if (currentUser.id === id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete your own account'
+      });
+    }
+
+    // Remove the user from the array
+    registeredUsers.splice(userIndex, 1);
+    
+    console.log(`User ${userToDelete.name} (${userToDelete.email}) deleted successfully`);
+
+    res.json({
+      success: true,
+      message: `User ${userToDelete.name} deleted successfully`,
+      data: { deletedUserId: id }
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete user',
+      error: error.message
+    });
+  }
+});
+
 // Update user in database with proper persistence
 app.put('/api/auth/users/:id', async (req, res) => {
   try {
