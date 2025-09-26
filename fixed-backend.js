@@ -138,6 +138,65 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Register endpoint
+app.post('/api/auth/register', (req, res) => {
+  try {
+    const { firstName, lastName, email, password, company, phone } = req.body;
+    
+    console.log('Registration attempt:', { firstName, lastName, email, company, phone });
+    
+    // Simple validation
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please fill in all required fields'
+      });
+    }
+    
+    // Check if email already exists (in a real app, check database)
+    const existingEmails = ['info@smartdesk.solutions', 'amanijohntsuma1@gmail.com', 'admin@smartdesk.com'];
+    if (existingEmails.includes(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already exists'
+      });
+    }
+    
+    // Create new user
+    const newUser = {
+      id: 'user-' + Date.now(),
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      name: `${firstName} ${lastName}`,
+      role: 'client',
+      company: company || '',
+      phone: phone || '',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    console.log('New user registered:', newUser);
+    
+    res.json({
+      success: true,
+      message: 'Registration successful',
+      data: {
+        user: newUser,
+        token: 'jwt-token-' + Date.now()
+      }
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Registration failed',
+      error: error.message
+    });
+  }
+});
+
 // Logout endpoint
 app.post('/api/auth/logout', (req, res) => {
   try {
