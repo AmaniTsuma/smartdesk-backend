@@ -120,6 +120,49 @@ app.get('/api/service-requests/public', (req, res) => {
   });
 });
 
+// User profile endpoint
+app.get('/api/auth/me', (req, res) => {
+  // Mock user data based on common login patterns
+  const user = {
+    id: 'admin-1',
+    email: 'info@smartdesk.solutions',
+    firstName: 'Smart Desk',
+    lastName: 'Solutions',
+    name: 'Smart Desk Solutions',
+    role: 'admin',
+    isActive: true,
+    company: 'Smart Desk Solutions',
+    phone: '',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: new Date().toISOString()
+  };
+  
+  res.json({
+    success: true,
+    data: user
+  });
+});
+
+// User update endpoint
+app.put('/api/auth/users/:id', (req, res) => {
+  const { id } = req.params;
+  const { firstName, lastName, email, phone, company } = req.body;
+  
+  res.json({
+    success: true,
+    message: 'User updated successfully',
+    data: {
+      id,
+      firstName: firstName || 'Smart Desk',
+      lastName: lastName || 'Solutions',
+      email: email || 'info@smartdesk.solutions',
+      phone: phone || '',
+      company: company || 'Smart Desk Solutions',
+      updatedAt: new Date().toISOString()
+    }
+  });
+});
+
 // Additional endpoints for admin and client functionality
 app.get('/api/auth/dashboard-stats', (req, res) => {
   res.json({
@@ -141,25 +184,40 @@ app.get('/api/auth/users', (req, res) => {
         id: 'admin-1',
         email: 'info@smartdesk.solutions',
         firstName: 'Smart Desk',
-        lastName: 'Admin',
+        lastName: 'Solutions',
+        name: 'Smart Desk Solutions',
         role: 'admin',
-        isActive: true
+        isActive: true,
+        company: 'Smart Desk Solutions',
+        phone: '',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: new Date().toISOString()
       },
       {
         id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
         email: 'amanijohntsuma1@gmail.com',
         firstName: 'Amani John',
         lastName: 'Tsuma',
+        name: 'Amani John Tsuma',
         role: 'client',
-        isActive: true
+        isActive: true,
+        company: 'AFRETEF',
+        phone: '0715896449',
+        createdAt: '2025-09-20T12:29:41.597Z',
+        updatedAt: new Date().toISOString()
       },
       {
         id: '29e8fe0c-dc5a-4897-8e9f-4afdcfcf808d',
         email: 'admin@smartdesk.com',
         firstName: 'Admin',
         lastName: 'User',
+        name: 'Admin User',
         role: 'admin',
-        isActive: true
+        isActive: true,
+        company: 'Smart Desk Solutions',
+        phone: '',
+        createdAt: '2025-09-20T15:52:46.672Z',
+        updatedAt: new Date().toISOString()
       }
     ]
   });
