@@ -29,7 +29,68 @@ const pool = mysql.createPool(dbConfig);
 let currentUser = null;
 
 // In-memory storage for service requests (in production, use database)
-let serviceRequests = [];
+let serviceRequests = [
+  {
+    id: 'req-sample-1',
+    title: 'Email & Calendar Management',
+    description: 'Comprehensive email and calendar management to keep your business organized and efficient.',
+    serviceType: 'consulting',
+    priority: 'medium',
+    status: 'pending',
+    clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+    clientName: 'Amani John Tsuma',
+    clientEmail: 'amanijohntsuma1@gmail.com',
+    preferredStartDate: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    adminId: null,
+    adminNotes: null,
+    estimatedHours: null,
+    actualHours: null,
+    budget: null,
+    deadline: null
+  },
+  {
+    id: 'req-sample-2',
+    title: 'Website Development Project',
+    description: 'Need a new company website with modern design and responsive layout.',
+    serviceType: 'consulting',
+    priority: 'high',
+    status: 'in-progress',
+    clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+    clientName: 'Amani John Tsuma',
+    clientEmail: 'amanijohntsuma1@gmail.com',
+    preferredStartDate: new Date().toISOString(),
+    createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    updatedAt: new Date().toISOString(),
+    adminId: 'admin-1',
+    adminNotes: 'Project started, initial design phase completed',
+    estimatedHours: 40,
+    actualHours: 15,
+    budget: 2000,
+    deadline: new Date(Date.now() + 2592000000).toISOString() // 30 days from now
+  },
+  {
+    id: 'req-sample-3',
+    title: 'Data Analysis Report',
+    description: 'Monthly data analysis and reporting for business insights.',
+    serviceType: 'consulting',
+    priority: 'low',
+    status: 'completed',
+    clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+    clientName: 'Amani John Tsuma',
+    clientEmail: 'amanijohntsuma1@gmail.com',
+    preferredStartDate: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+    createdAt: new Date(Date.now() - 172800000).toISOString(),
+    updatedAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+    adminId: 'admin-1',
+    adminNotes: 'Report completed and delivered to client',
+    estimatedHours: 20,
+    actualHours: 18,
+    budget: 1000,
+    deadline: new Date(Date.now() - 86400000).toISOString()
+  }
+];
 
 // In-memory storage for registered users (in production, use database)
 let registeredUsers = [
@@ -868,6 +929,11 @@ app.get('/api/service-requests/client-dashboard-stats', (req, res) => {
       request.clientId === currentUser.id || 
       request.clientEmail === currentUser.email
     );
+
+    console.log(`Total service requests: ${serviceRequests.length}`);
+    console.log(`Current user: ${currentUser.email} (ID: ${currentUser.id})`);
+    console.log(`User requests found: ${userRequests.length}`);
+    console.log(`User requests:`, userRequests.map(req => ({ id: req.id, title: req.title, status: req.status })));
 
     // Calculate stats based on user's actual requests
     const stats = {
