@@ -4,7 +4,7 @@
   "description": "Backend API for Smart Desk Solutions",
   "main": "dist/index.js",
   "scripts": {
-    "start": "node new-backend.js",
+    "start": "node render-backend.js",
     "setup-db": "node dist/scripts/setupDatabase.js",
     "migrate-data": "node dist/scripts/migrateData.js",
     "migrate-sqlite": "node dist/scripts/migrateToSQLite.js"
