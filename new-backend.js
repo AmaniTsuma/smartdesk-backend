@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Basic routes
 app.get('/api/test', (req, res) => {
-  res.json({ message: 'NEW BACKEND - 6 SERVICES READY!' });
+  res.json({ message: 'FIXED BACKEND - LOGIN WORKING NOW!' });
 });
 
 app.get('/api/service-requests/public', (req, res) => {
