@@ -669,6 +669,10 @@ app.get('/api/service-requests/admin-requests', (req, res) => {
       });
     }
 
+    console.log(`Admin service requests requested by: ${currentUser.email}`);
+    console.log(`Total service requests available: ${serviceRequests.length}`);
+    console.log(`Service requests:`, serviceRequests.map(req => ({ id: req.id, title: req.title, status: req.status, clientName: req.clientName })));
+
     // Return all service requests for admin to manage
     res.json({
       success: true,
