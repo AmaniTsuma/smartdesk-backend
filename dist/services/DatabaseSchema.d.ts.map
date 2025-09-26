@@ -1,0 +1,1 @@
+{"version":3,"file":"DatabaseSchema.d.ts","sourceRoot":"","sources":["../../src/services/DatabaseSchema.ts"],"names":[],"mappings":"AAEA,qBAAa,cAAc;WACZ,YAAY,IAAI,OAAO,CAAC,IAAI,CAAC;WAoI7B,UAAU,IAAI,OAAO,CAAC,IAAI,CAAC;WAwB3B,eAAe,IAAI,OAAO,CAAC,IAAI,CAAC;CAuC9C"}

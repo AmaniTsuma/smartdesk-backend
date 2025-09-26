@@ -1,0 +1,35 @@
+{
+  "name": "smart-desk-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Smart Desk Solutions",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "setup-db": "node dist/scripts/setupDatabase.js",
+    "migrate-data": "node dist/scripts/migrateData.js",
+    "migrate-sqlite": "node dist/scripts/migrateToSQLite.js"
+  },
+  "keywords": [
+    "smart-desk",
+    "api",
+    "backend"
+  ],
+  "author": "Smart Desk Solutions",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "nodemailer": "^7.0.6",
+    "mysql2": "^3.6.5",
+    "socket.io": "^4.8.1",
+    "sqlite3": "^5.1.7",
+    "uuid": "^13.0.0"
+  }
+}

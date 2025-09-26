@@ -1,0 +1,46 @@
+[
+  {
+    "id": "admin-1",
+    "email": "info@smartdesk.solutions",
+    "password": "$2b$12$9RyQoSuTwzRbg43UZAaJVuM/282i0WKVs5JsbMHdDnS2puKVArePG",
+    "firstName": "Smart Desk",
+    "lastName": "Admin",
+    "role": "admin",
+    "isActive": true,
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2025-09-21T08:55:08.998Z",
+    "lastLogin": "2025-09-21T08:55:08.998Z",
+    "company": "Smart Desk",
+    "phone": ""
+  },
+  {
+    "id": "59fe66a6-2f50-4272-b284-fbb3da05d9a0",
+    "email": "amanijohntsuma1@gmail.com",
+    "password": "$2b$12$5lJwa8PS/AACkErgOI1O2Ogjbt0IboQyDgbZsZN/45Z6aauOVEfkG",
+    "firstName": "Amani John",
+    "lastName": "Tsuma",
+    "role": "client",
+    "isActive": true,
+    "createdAt": "2025-09-20T12:29:41.597Z",
+    "updatedAt": "2025-09-21T12:08:09.138Z",
+    "lastLogin": "2025-09-21T12:08:09.138Z",
+    "company": "AFRETEF",
+    "phone": "0715896449",
+    "address": "",
+    "industry": "",
+    "website": "",
+    "bio": ""
+  },
+  {
+    "id": "29e8fe0c-dc5a-4897-8e9f-4afdcfcf808d",
+    "email": "admin@smartdesk.com",
+    "password": "$2b$12$omBlqX3TfTRZ3rFRSI9Wx.ER7.AhtEIGj0JIcGT1IElXUOM2Esbdi",
+    "firstName": "Admin",
+    "lastName": "User",
+    "role": "admin",
+    "isActive": true,
+    "createdAt": "2025-09-20T15:52:46.672Z",
+    "updatedAt": "2025-09-20T16:14:43.567Z",
+    "lastLogin": "2025-09-20T16:14:43.567Z"
+  }
+]

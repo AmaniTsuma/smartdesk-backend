@@ -1,0 +1,1 @@
+{"version":3,"file":"migrateToSQLite.d.ts","sourceRoot":"","sources":["../../src/scripts/migrateToSQLite.ts"],"names":[],"mappings":"AA8CA,cAAM,kBAAkB;IACtB,OAAO,CAAC,OAAO,CAAqC;IAE9C,cAAc,IAAI,OAAO,CAAC,IAAI,CAAC;YA6BvB,YAAY;YAyDZ,qBAAqB;YAkDrB,sBAAsB;YAuDtB,oBAAoB;YA8CpB,eAAe;IAkDvB,eAAe,IAAI,OAAO,CAAC,IAAI,CAAC;CAoBvC;AA6BD,OAAO,EAAE,kBAAkB,EAAE,CAAA"}

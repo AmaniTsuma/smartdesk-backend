@@ -1,0 +1,1 @@
+{"version":3,"file":"migrateData.d.ts","sourceRoot":"","sources":["../../src/scripts/migrateData.ts"],"names":[],"mappings":"AA0DA,cAAM,YAAY;IAChB,OAAO,CAAC,OAAO,CAAqC;IAE9C,cAAc,IAAI,OAAO,CAAC,IAAI,CAAC;YA8BvB,YAAY;YAqCZ,qBAAqB;YAoCrB,sBAAsB;YAuDtB,oBAAoB;YA8CpB,eAAe;YAkDf,qBAAqB;IAQ7B,eAAe,IAAI,OAAO,CAAC,IAAI,CAAC;CAoBvC;AA6BD,OAAO,EAAE,YAAY,EAAE,CAAA"}
