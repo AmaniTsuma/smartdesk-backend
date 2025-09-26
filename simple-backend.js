@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Basic routes
 app.get('/api/test', (req, res) => {
-  res.json({ message: 'Simple backend is working!' });
+  res.json({ message: 'Simple backend is working! - Updated with 6 services' });
 });
 
 app.get('/api/service-requests/public', (req, res) => {
