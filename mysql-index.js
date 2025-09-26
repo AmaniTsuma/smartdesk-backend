@@ -67,23 +67,26 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Import routes
-const authRoutes = require('./dist/routes/auth');
-const serviceRequestRoutes = require('./dist/routes/serviceRequests');
-const messagingRoutes = require('./dist/routes/messaging');
-const contactRoutes = require('./dist/routes/contact');
-const servicesRoutes = require('./dist/routes/services');
-
-// Mount API routes
-app.use('/api/auth', authRoutes);
-app.use('/api/service-requests', serviceRequestRoutes);
-app.use('/api/messaging', messagingRoutes);
-app.use('/api/contact', contactRoutes);
-app.use('/api/services', servicesRoutes);
-
 // Basic API routes
 app.get('/api/test', (req, res) => {
   res.json({ message: 'MySQL API is working!' });
+});
+
+// Service requests endpoint
+app.get('/api/service-requests/public', (req, res) => {
+  res.json({ 
+    success: true, 
+    data: [], 
+    message: 'Public services endpoint - MySQL version' 
+  });
+});
+
+// Auth endpoint
+app.get('/api/auth/me', (req, res) => {
+  res.json({ 
+    success: false, 
+    message: 'Authentication required' 
+  });
 });
 
 // 404 handler
