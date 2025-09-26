@@ -658,6 +658,67 @@ app.get('/api/service-requests/stats/overview', (req, res) => {
   });
 });
 
+// Create service request (client submission)
+app.post('/api/service-requests', (req, res) => {
+  try {
+    const { title, description, serviceType, priority, preferredStartDate } = req.body;
+    
+    console.log('Service request submission:', { title, description, serviceType, priority, preferredStartDate });
+    
+    // Basic validation
+    if (!title || !description) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title and description are required'
+      });
+    }
+    
+    if (description.length < 20) {
+      return res.status(400).json({
+        success: false,
+        message: 'Description must be at least 20 characters long'
+      });
+    }
+    
+    // Create service request object
+    const serviceRequest = {
+      id: 'req-' + Date.now(),
+      title: title.trim(),
+      description: description.trim(),
+      serviceType: serviceType || 'consulting',
+      priority: priority || 'medium',
+      status: 'pending',
+      clientId: currentUser ? currentUser.id : 'anonymous',
+      clientName: currentUser ? currentUser.name : 'Anonymous User',
+      clientEmail: currentUser ? currentUser.email : 'anonymous@example.com',
+      preferredStartDate: preferredStartDate || new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      adminId: null,
+      adminNotes: null,
+      estimatedHours: null,
+      actualHours: null,
+      budget: null,
+      deadline: null
+    };
+    
+    console.log('Service request created:', serviceRequest);
+    
+    res.json({
+      success: true,
+      message: 'Service request submitted successfully',
+      data: serviceRequest
+    });
+  } catch (error) {
+    console.error('Service request creation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create service request',
+      error: error.message
+    });
+  }
+});
+
 // Available services for client request page
 app.get('/api/services/available', (req, res) => {
   const availableServices = [
