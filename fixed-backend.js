@@ -488,24 +488,28 @@ app.get('/api/auth/dashboard-stats', async (req, res) => {
       });
     }
 
-    // Return hardcoded stats to avoid database issues
+    // Calculate real stats from stored data
+    const stats = {
+      totalUsers: registeredUsers.length,
+      totalServices: 6, // Admin-created services
+      totalRequests: serviceRequests.length,
+      activeConversations: 8 // Mock conversations
+    };
+
+    console.log(`Admin dashboard stats for ${currentUser.name}:`, stats);
+
     res.json({
       success: true,
-      data: {
-        totalUsers: 3,
-        totalServices: 6,
-        totalRequests: 13,
-        activeConversations: 8
-      }
+      data: stats
     });
   } catch (error) {
     console.error('Dashboard stats error:', error);
     res.json({
       success: true,
       data: {
-        totalUsers: 3,
+        totalUsers: registeredUsers.length,
         totalServices: 6,
-        totalRequests: 13,
+        totalRequests: serviceRequests.length,
         activeConversations: 8
       }
     });
@@ -592,6 +596,32 @@ app.get('/api/service-requests/client-requests', (req, res) => {
     data: userRequests,
     message: `Found ${userRequests.length} service requests for ${currentUser.name}`
   });
+});
+
+// Admin service requests endpoint - shows ALL client submissions
+app.get('/api/service-requests/admin-requests', (req, res) => {
+  try {
+    if (!currentUser) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access denied. Please log in.'
+      });
+    }
+
+    // Return all service requests for admin to manage
+    res.json({
+      success: true,
+      data: serviceRequests,
+      message: `Found ${serviceRequests.length} total service requests for admin review`
+    });
+  } catch (error) {
+    console.error('Admin service requests error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch service requests',
+      error: error.message
+    });
+  }
 });
 
 // General service requests
@@ -825,15 +855,46 @@ app.get('/api/messaging/conversations', (req, res) => {
 
 // Client dashboard stats endpoint
 app.get('/api/service-requests/client-dashboard-stats', (req, res) => {
-  res.json({
-    success: true,
-    data: {
-      activeServices: 0,
-      completedServices: 0,
-      pendingRequests: 0,
-      rejectedRequests: 0
+  try {
+    if (!currentUser) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access denied. Please log in.'
+      });
     }
-  });
+
+    // Filter service requests for the current user
+    const userRequests = serviceRequests.filter(request => 
+      request.clientId === currentUser.id || 
+      request.clientEmail === currentUser.email
+    );
+
+    // Calculate stats based on user's actual requests
+    const stats = {
+      activeServices: userRequests.filter(req => req.status === 'in-progress').length,
+      completedServices: userRequests.filter(req => req.status === 'completed').length,
+      pendingRequests: userRequests.filter(req => req.status === 'pending').length,
+      rejectedRequests: userRequests.filter(req => req.status === 'rejected').length
+    };
+
+    console.log(`Client dashboard stats for ${currentUser.name}:`, stats);
+
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Client dashboard stats error:', error);
+    res.json({
+      success: true,
+      data: {
+        activeServices: 0,
+        completedServices: 0,
+        pendingRequests: 0,
+        rejectedRequests: 0
+      }
+    });
+  }
 });
 
 app.get('/api/messaging/unread-count', (req, res) => {
