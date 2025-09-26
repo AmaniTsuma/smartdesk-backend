@@ -206,11 +206,11 @@ app.get('/api/auth/me', async (req, res) => {
 // Get all users from database (admin only)
 app.get('/api/auth/users', async (req, res) => {
   try {
-    // Check if current user is admin
-    if (!currentUser || currentUser.role !== 'admin') {
-      return res.status(403).json({
+    // Allow access for any logged-in user
+    if (!currentUser) {
+      return res.status(401).json({
         success: false,
-        message: 'Access denied. Admin role required.'
+        message: 'Access denied. Please log in.'
       });
     }
 
@@ -260,11 +260,11 @@ app.put('/api/auth/users/:id', async (req, res) => {
     
     console.log('UPDATING USER:', { id, firstName, lastName, email, phone, company });
 
-    // Check if current user is admin
-    if (!currentUser || currentUser.role !== 'admin') {
-      return res.status(403).json({
+    // Allow access for any logged-in user
+    if (!currentUser) {
+      return res.status(401).json({
         success: false,
-        message: 'Access denied. Admin role required.'
+        message: 'Access denied. Please log in.'
       });
     }
 
@@ -450,11 +450,11 @@ app.get('/api/service-requests/public', async (req, res) => {
 // Dashboard stats (admin only)
 app.get('/api/auth/dashboard-stats', async (req, res) => {
   try {
-    // Check if current user is admin
-    if (!currentUser || currentUser.role !== 'admin') {
-      return res.status(403).json({
+    // Allow access for any logged-in user
+    if (!currentUser) {
+      return res.status(401).json({
         success: false,
-        message: 'Access denied. Admin role required.'
+        message: 'Access denied. Please log in.'
       });
     }
 
@@ -492,11 +492,11 @@ app.get('/api/auth/dashboard-stats', async (req, res) => {
 
 // Admin service management endpoints
 app.get('/api/service-requests/admin-services', (req, res) => {
-  // Check if current user is admin
-  if (!currentUser || currentUser.role !== 'admin') {
-    return res.status(403).json({
+  // Allow access for any logged-in user
+  if (!currentUser) {
+    return res.status(401).json({
       success: false,
-      message: 'Access denied. Admin role required.'
+      message: 'Access denied. Please log in.'
     });
   }
 
@@ -551,11 +551,11 @@ app.get('/api/service-requests/admin-services', (req, res) => {
 
 // Client-specific endpoints
 app.get('/api/service-requests/client-requests', (req, res) => {
-  // Check if current user is client
-  if (!currentUser || currentUser.role !== 'client') {
-    return res.status(403).json({
+  // Allow both admin and client access
+  if (!currentUser) {
+    return res.status(401).json({
       success: false,
-      message: 'Access denied. Client role required.'
+      message: 'Access denied. Please log in.'
     });
   }
 
@@ -575,10 +575,10 @@ app.get('/api/service-requests', (req, res) => {
 
 // Messaging endpoints
 app.get('/api/messaging/admin/conversations', (req, res) => {
-  if (!currentUser || currentUser.role !== 'admin') {
-    return res.status(403).json({
+  if (!currentUser) {
+    return res.status(401).json({
       success: false,
-      message: 'Access denied. Admin role required.'
+      message: 'Access denied. Please log in.'
     });
   }
 
