@@ -602,10 +602,15 @@ app.get('/api/auth/dashboard-stats', async (req, res) => {
     }
 
     // Calculate real stats from stored data
+    const completedServices = serviceRequests.filter(req => req.status === 'completed').length;
+    const pendingRequests = serviceRequests.filter(req => req.status === 'pending').length;
+    const rejectedRequests = serviceRequests.filter(req => req.status === 'rejected').length;
+    
     const stats = {
       totalUsers: registeredUsers.length,
-      totalServices: 6, // Admin-created services
-      totalRequests: serviceRequests.length,
+      completedServices: completedServices,
+      pendingRequests: pendingRequests,
+      rejectedRequests: rejectedRequests,
       activeConversations: 8 // Mock conversations
     };
 
