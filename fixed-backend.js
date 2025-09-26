@@ -31,6 +31,49 @@ let currentUser = null;
 // In-memory storage for service requests (in production, use database)
 let serviceRequests = [];
 
+// In-memory storage for registered users (in production, use database)
+let registeredUsers = [
+  {
+    id: 'admin-1',
+    email: 'info@smartdesk.solutions',
+    firstName: 'Smart Desk',
+    lastName: 'Solutions',
+    name: 'Smart Desk Solutions',
+    role: 'admin',
+    isActive: true,
+    company: 'Smart Desk Solutions',
+    phone: '',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+    email: 'amanijohntsuma1@gmail.com',
+    firstName: 'Amani John',
+    lastName: 'Tsuma',
+    name: 'Amani John Tsuma',
+    role: 'client',
+    isActive: true,
+    company: 'AFRETEF',
+    phone: '0715896449',
+    createdAt: '2025-09-20T12:29:41.597Z',
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: '29e8fe0c-dc5a-4897-8e9f-4afdcfcf808d',
+    email: 'admin@smartdesk.com',
+    firstName: 'Admin',
+    lastName: 'User',
+    name: 'Admin User',
+    role: 'admin',
+    isActive: true,
+    company: 'Smart Desk Solutions',
+    phone: '',
+    createdAt: '2025-09-20T15:52:46.672Z',
+    updatedAt: new Date().toISOString()
+  }
+];
+
 // Test database connection
 async function testConnection() {
   try {
@@ -67,50 +110,8 @@ app.post('/api/auth/login', async (req, res) => {
     };
 
     if (validCredentials[email] && validCredentials[email] === password) {
-      // Use hardcoded user data to avoid database connection issues
-      const users = {
-        'info@smartdesk.solutions': {
-          id: 'admin-1',
-          email: 'info@smartdesk.solutions',
-          firstName: 'Smart Desk',
-          lastName: 'Solutions',
-          name: 'Smart Desk Solutions',
-          role: 'admin',
-          company: 'Smart Desk Solutions',
-          phone: '',
-          isActive: true,
-          createdAt: '2024-01-01T00:00:00.000Z',
-          updatedAt: new Date().toISOString()
-        },
-        'amanijohntsuma1@gmail.com': {
-          id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
-          email: 'amanijohntsuma1@gmail.com',
-          firstName: 'Amani John',
-          lastName: 'Tsuma',
-          name: 'Amani John Tsuma',
-          role: 'client',
-          company: 'AFRETEF',
-          phone: '0715896449',
-          isActive: true,
-          createdAt: '2025-09-20T12:29:41.597Z',
-          updatedAt: new Date().toISOString()
-        },
-        'admin@smartdesk.com': {
-          id: '29e8fe0c-dc5a-4897-8e9f-4afdcfcf808d',
-          email: 'admin@smartdesk.com',
-          firstName: 'Admin',
-          lastName: 'User',
-          name: 'Admin User',
-          role: 'admin',
-          company: 'Smart Desk Solutions',
-          phone: '',
-          isActive: true,
-          createdAt: '2025-09-20T15:52:46.672Z',
-          updatedAt: new Date().toISOString()
-        }
-      };
-
-      const user = users[email];
+      // Find user in registered users
+      const user = registeredUsers.find(u => u.email === email);
       
       // Store current user session
       currentUser = user;
@@ -156,9 +157,9 @@ app.post('/api/auth/register', (req, res) => {
       });
     }
     
-    // Check if email already exists (in a real app, check database)
-    const existingEmails = ['info@smartdesk.solutions', 'amanijohntsuma1@gmail.com', 'admin@smartdesk.com'];
-    if (existingEmails.includes(email)) {
+    // Check if email already exists
+    const existingUser = registeredUsers.find(user => user.email === email);
+    if (existingUser) {
       return res.status(400).json({
         success: false,
         message: 'Email already exists'
@@ -180,7 +181,14 @@ app.post('/api/auth/register', (req, res) => {
       updatedAt: new Date().toISOString()
     };
     
-    console.log('New user registered:', newUser);
+    // Store the new user
+    registeredUsers.push(newUser);
+    
+    // Set as current user
+    currentUser = newUser;
+    
+    console.log('New user registered and stored:', newUser);
+    console.log('Total registered users:', registeredUsers.length);
     
     res.json({
       success: true,
@@ -222,9 +230,6 @@ app.post('/api/auth/logout', (req, res) => {
 // User profile endpoint - returns the ACTUAL logged in user
 app.get('/api/auth/me', async (req, res) => {
   try {
-    // For now, return hardcoded user data based on common login patterns
-    // In production, this would use JWT tokens to identify the user
-    
     // Check if we have a current user session
     if (currentUser) {
       console.log('Returning current user:', currentUser.email, currentUser.role);
@@ -234,26 +239,11 @@ app.get('/api/auth/me', async (req, res) => {
       });
     }
 
-    // Fallback: return client user data (most common case)
-    const clientUser = {
-      id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
-      email: 'amanijohntsuma1@gmail.com',
-      firstName: 'Amani John',
-      lastName: 'Tsuma',
-      name: 'Amani John Tsuma',
-      role: 'client',
-      isActive: true,
-      company: 'AFRETEF',
-      phone: '0715896449',
-      createdAt: '2025-09-20T12:29:41.597Z',
-      updatedAt: new Date().toISOString()
-    };
-
-    console.log('Returning fallback client user:', clientUser.email, clientUser.role);
-    
-    res.json({
-      success: true,
-      data: clientUser
+    // No current user session - return error
+    console.log('No current user session found');
+    res.status(401).json({
+      success: false,
+      message: 'Not logged in. Please log in to access your profile.'
     });
   } catch (error) {
     console.error('Get user profile error:', error);
@@ -276,54 +266,11 @@ app.get('/api/auth/users', async (req, res) => {
       });
     }
 
-    // Use hardcoded user data to avoid database connection issues
-    const users = [
-      {
-        id: 'admin-1',
-        email: 'info@smartdesk.solutions',
-        firstName: 'Smart Desk',
-        lastName: 'Solutions',
-        name: 'Smart Desk Solutions',
-        role: 'admin',
-        isActive: true,
-        company: 'Smart Desk Solutions',
-        phone: '',
-        createdAt: '2024-01-01T00:00:00.000Z',
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
-        email: 'amanijohntsuma1@gmail.com',
-        firstName: 'Amani John',
-        lastName: 'Tsuma',
-        name: 'Amani John Tsuma',
-        role: 'client',
-        isActive: true,
-        company: 'AFRETEF',
-        phone: '0715896449',
-        createdAt: '2025-09-20T12:29:41.597Z',
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: '29e8fe0c-dc5a-4897-8e9f-4afdcfcf808d',
-        email: 'admin@smartdesk.com',
-        firstName: 'Admin',
-        lastName: 'User',
-        name: 'Admin User',
-        role: 'admin',
-        isActive: true,
-        company: 'Smart Desk Solutions',
-        phone: '',
-        createdAt: '2025-09-20T15:52:46.672Z',
-        updatedAt: new Date().toISOString()
-      }
-    ];
-
-    console.log(`Returning ${users.length} users for:`, currentUser.email);
+    console.log(`Returning ${registeredUsers.length} users for:`, currentUser.email);
 
     res.json({
       success: true,
-      data: users
+      data: registeredUsers
     });
   } catch (error) {
     console.error('Get users error:', error);
