@@ -28,6 +28,9 @@ const pool = mysql.createPool(dbConfig);
 // Store current logged-in user session (in production, use JWT tokens)
 let currentUser = null;
 
+// In-memory storage for service requests (in production, use database)
+let serviceRequests = [];
+
 // Test database connection
 async function testConnection() {
   try {
@@ -631,9 +634,16 @@ app.get('/api/service-requests/client-requests', (req, res) => {
     });
   }
 
+  // Filter service requests for the current user
+  const userRequests = serviceRequests.filter(request => 
+    request.clientId === currentUser.id || 
+    request.clientEmail === currentUser.email
+  );
+
   res.json({
     success: true,
-    data: []
+    data: userRequests,
+    message: `Found ${userRequests.length} service requests for ${currentUser.name}`
   });
 });
 
@@ -641,7 +651,8 @@ app.get('/api/service-requests/client-requests', (req, res) => {
 app.get('/api/service-requests', (req, res) => {
   res.json({
     success: true,
-    data: []
+    data: serviceRequests,
+    message: `Found ${serviceRequests.length} service requests`
   });
 });
 
@@ -702,7 +713,11 @@ app.post('/api/service-requests', (req, res) => {
       deadline: null
     };
     
-    console.log('Service request created:', serviceRequest);
+    // Store the service request in memory
+    serviceRequests.push(serviceRequest);
+    
+    console.log('Service request created and stored:', serviceRequest);
+    console.log('Total service requests:', serviceRequests.length);
     
     res.json({
       success: true,
