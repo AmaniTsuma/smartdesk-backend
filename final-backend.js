@@ -120,6 +120,151 @@ app.get('/api/service-requests/public', (req, res) => {
   });
 });
 
+// Additional endpoints for admin and client functionality
+app.get('/api/auth/dashboard-stats', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      totalUsers: 3,
+      totalServices: 6,
+      totalRequests: 13,
+      activeConversations: 8
+    }
+  });
+});
+
+app.get('/api/auth/users', (req, res) => {
+  res.json({
+    success: true,
+    data: [
+      {
+        id: 'admin-1',
+        email: 'info@smartdesk.solutions',
+        firstName: 'Smart Desk',
+        lastName: 'Admin',
+        role: 'admin',
+        isActive: true
+      },
+      {
+        id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+        email: 'amanijohntsuma1@gmail.com',
+        firstName: 'Amani John',
+        lastName: 'Tsuma',
+        role: 'client',
+        isActive: true
+      },
+      {
+        id: '29e8fe0c-dc5a-4897-8e9f-4afdcfcf808d',
+        email: 'admin@smartdesk.com',
+        firstName: 'Admin',
+        lastName: 'User',
+        role: 'admin',
+        isActive: true
+      }
+    ]
+  });
+});
+
+app.get('/api/service-requests/admin-services', (req, res) => {
+  res.json({
+    success: true,
+    data: [
+      {
+        id: 'service-1',
+        title: 'Email & Calendar Management',
+        description: 'Comprehensive email and calendar management.',
+        status: 'available',
+        createdBy: 'admin'
+      },
+      {
+        id: 'service-2',
+        title: 'Document Management & Organization',
+        description: 'Professional document organization services.',
+        status: 'available',
+        createdBy: 'admin'
+      },
+      {
+        id: 'service-3',
+        title: 'Administrative Support',
+        description: 'Comprehensive administrative support.',
+        status: 'available',
+        createdBy: 'admin'
+      },
+      {
+        id: 'service-4',
+        title: 'Customer Service Management',
+        description: 'Professional customer service management.',
+        status: 'available',
+        createdBy: 'admin'
+      },
+      {
+        id: 'service-5',
+        title: 'Data Analysis & Reporting',
+        description: 'Comprehensive data analysis and reporting.',
+        status: 'available',
+        createdBy: 'admin'
+      },
+      {
+        id: 'service-6',
+        title: 'Project Management Support',
+        description: 'Professional project management support.',
+        status: 'available',
+        createdBy: 'admin'
+      }
+    ]
+  });
+});
+
+app.get('/api/service-requests/client-requests', (req, res) => {
+  res.json({
+    success: true,
+    data: []
+  });
+});
+
+app.get('/api/service-requests/stats/overview', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      total: 6,
+      available: 6,
+      inProgress: 0,
+      completed: 0
+    }
+  });
+});
+
+app.get('/api/service-requests', (req, res) => {
+  res.json({
+    success: true,
+    data: []
+  });
+});
+
+app.get('/api/messaging/admin/conversations', (req, res) => {
+  res.json({
+    success: true,
+    data: []
+  });
+});
+
+app.get('/api/messaging/unread-count', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      unreadCount: 0
+    }
+  });
+});
+
+// Socket.IO endpoint (mock)
+app.get('/socket.io/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Socket.IO endpoint available'
+  });
+});
+
 // CONTACT ENDPOINT
 app.post('/api/contact', (req, res) => {
   res.json({
