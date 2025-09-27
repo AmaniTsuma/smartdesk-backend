@@ -1020,10 +1020,11 @@ app.get('/api/services/available', (req, res) => {
 // Messaging endpoints
 app.get('/api/messaging/admin/conversations', (req, res) => {
   try {
+    // Return all conversations for admin
     res.json({
       success: true,
-      data: [],
-      message: 'No conversations found'
+      data: conversations,
+      message: `Found ${conversations.length} conversations`
     });
   } catch (error) {
     console.error('Admin conversations error:', error);
@@ -1037,10 +1038,15 @@ app.get('/api/messaging/admin/conversations', (req, res) => {
 
 app.get('/api/messaging/conversations', (req, res) => {
   try {
+    // Return conversations for current user
+    const userConversations = conversations.filter(conv => 
+      conv.participants.some(p => p.userId === currentUser?.id)
+    );
+    
     res.json({
       success: true,
-      data: [],
-      message: 'No conversations found'
+      data: userConversations,
+      message: `Found ${userConversations.length} conversations`
     });
   } catch (error) {
     console.error('Conversations error:', error);
@@ -1080,9 +1086,14 @@ app.get('/api/service-requests/client-dashboard-stats', (req, res) => {
 
 app.get('/api/messaging/unread-count', (req, res) => {
   try {
+    // Count unread messages for current user
+    const unreadCount = messages.filter(msg => 
+      msg.senderId !== currentUser?.id && !msg.isRead
+    ).length;
+    
     res.json({
       success: true,
-      data: { count: 0 }
+      data: { unreadCount }
     });
   } catch (error) {
     console.error('Unread count error:', error);
@@ -1098,7 +1109,7 @@ app.get('/api/messaging/status', (req, res) => {
   try {
     res.json({
       success: true,
-      data: { status: 'offline' }
+      data: { status: 'online' }
     });
   } catch (error) {
     console.error('Messaging status error:', error);
@@ -1128,6 +1139,146 @@ app.post('/api/messaging/public/send', (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to send message',
+      error: error.message
+    });
+  }
+});
+
+// In-memory storage for messages and conversations
+let conversations = [];
+let messages = [];
+
+// Send message endpoint
+app.post('/api/messaging/send', (req, res) => {
+  try {
+    console.log('Message send request:', req.body);
+    
+    const { content, conversationId, recipientId, messageType = 'text' } = req.body;
+    
+    if (!content || !content.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message content is required'
+      });
+    }
+    
+    // Create or find conversation
+    let conversation = conversations.find(c => c.id === conversationId);
+    if (!conversation) {
+      // Create new conversation
+      conversation = {
+        id: conversationId || `conv-${Date.now()}`,
+        participants: [
+          {
+            userId: currentUser?.id || 'public-user',
+            userName: currentUser?.name || 'Public User',
+            userEmail: currentUser?.email || 'public@example.com',
+            userRole: currentUser?.role || 'public',
+            joinedAt: new Date().toISOString(),
+            isActive: true
+          }
+        ],
+        conversationType: currentUser?.role === 'admin' ? 'client-admin' : 'public-support',
+        title: currentUser?.role === 'admin' ? 'Admin Support' : 'Client Support',
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      conversations.push(conversation);
+    }
+    
+    // Create message
+    const message = {
+      id: `msg-${Date.now()}`,
+      senderId: currentUser?.id || 'public-user',
+      senderName: currentUser?.name || 'Public User',
+      senderEmail: currentUser?.email || 'public@example.com',
+      senderRole: currentUser?.role || 'public',
+      content: content.trim(),
+      messageType: messageType,
+      conversationId: conversation.id,
+      isRead: false,
+      isDeleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    messages.push(message);
+    
+    // Update conversation with last message
+    conversation.lastMessage = message;
+    conversation.lastMessageAt = message.createdAt;
+    conversation.updatedAt = new Date().toISOString();
+    
+    // Emit message via Socket.IO
+    io.emit('new-message', message);
+    
+    // Send notification to admin if message is from client/public
+    if (message.senderRole === 'client' || message.senderRole === 'public') {
+      io.to('admin-room').emit('message-notification', {
+        conversationId: conversation.id,
+        message
+      });
+    }
+    
+    res.json({
+      success: true,
+      data: message,
+      message: 'Message sent successfully'
+    });
+    
+  } catch (error) {
+    console.error('Send message error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send message',
+      error: error.message
+    });
+  }
+});
+
+// Get conversation messages
+app.get('/api/messaging/conversations/:id/messages', (req, res) => {
+  try {
+    const { id } = req.params;
+    const conversationMessages = messages.filter(msg => msg.conversationId === id);
+    
+    res.json({
+      success: true,
+      data: conversationMessages,
+      message: `Found ${conversationMessages.length} messages`
+    });
+  } catch (error) {
+    console.error('Get messages error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch messages',
+      error: error.message
+    });
+  }
+});
+
+// Mark conversation as read
+app.put('/api/messaging/conversations/:id/read', (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Mark all messages in conversation as read
+    messages.forEach(msg => {
+      if (msg.conversationId === id && msg.senderId !== currentUser?.id) {
+        msg.isRead = true;
+      }
+    });
+    
+    res.json({
+      success: true,
+      message: 'Conversation marked as read'
+    });
+  } catch (error) {
+    console.error('Mark as read error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to mark conversation as read',
       error: error.message
     });
   }
