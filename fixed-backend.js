@@ -249,8 +249,8 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Register endpoint
-app.post('/api/auth/register', (req, res) => {
+// Register endpoint - Save to database
+app.post('/api/auth/register', async (req, res) => {
   try {
     const { firstName, lastName, email, password, company, phone } = req.body;
     
@@ -264,47 +264,83 @@ app.post('/api/auth/register', (req, res) => {
       });
     }
     
-    // Check if email already exists
-    const existingUser = registeredUsers.find(user => user.email === email);
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already exists'
+    const connection = await pool.getConnection();
+    
+    try {
+      // Check if email already exists in database
+      const [existingUsers] = await connection.execute(
+        'SELECT id FROM users WHERE email = ?',
+        [email]
+      );
+      
+      if (existingUsers.length > 0) {
+        connection.release();
+        return res.status(400).json({
+          success: false,
+          message: 'Email already exists'
+        });
+      }
+      
+      // Create new user in database
+      const userId = 'user-' + Date.now();
+      await connection.execute(
+        `INSERT INTO users (id, email, first_name, last_name, role, company, phone, password, is_active, created_at, updated_at) 
+         VALUES (?, ?, ?, ?, 'client', ?, ?, ?, true, NOW(), NOW())`,
+        [userId, email, firstName, lastName, company || '', phone || '', password]
+      );
+      
+      // Get the created user
+      const [rows] = await connection.execute(
+        'SELECT id, email, first_name, last_name, role, is_active, company, phone, created_at, updated_at FROM users WHERE id = ?',
+        [userId]
+      );
+      
+      connection.release();
+      
+      if (rows.length === 0) {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create user'
+        });
+      }
+      
+      const user = rows[0];
+      const newUser = {
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        name: `${user.first_name} ${user.last_name}`,
+        role: user.role,
+        isActive: user.is_active,
+        company: user.company || '',
+        phone: user.phone || '',
+        createdAt: user.created_at,
+        updatedAt: user.updated_at
+      };
+      
+      // Also add to registeredUsers array for session management
+      registeredUsers.push(newUser);
+      
+      // Set as current user
+      currentUser = newUser;
+      
+      console.log('✅ New user registered and saved to database:', newUser);
+      
+      res.json({
+        success: true,
+        message: 'Registration successful',
+        data: {
+          user: newUser,
+          token: 'jwt-token-' + Date.now()
+        }
       });
+      
+    } catch (dbError) {
+      connection.release();
+      throw dbError;
     }
     
-    // Create new user
-    const newUser = {
-      id: 'user-' + Date.now(),
-      email: email,
-      firstName: firstName,
-      lastName: lastName,
-      name: `${firstName} ${lastName}`,
-      role: 'client',
-      company: company || '',
-      phone: phone || '',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    // Store the new user
-    registeredUsers.push(newUser);
-    
-    // Set as current user
-    currentUser = newUser;
-    
-    console.log('New user registered and stored:', newUser);
-    console.log('Total registered users:', registeredUsers.length);
-    
-    res.json({
-      success: true,
-      message: 'Registration successful',
-      data: {
-        user: newUser,
-        token: 'jwt-token-' + Date.now()
-      }
-    });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({
@@ -948,44 +984,81 @@ app.get('/api/service-requests', (req, res) => {
   });
 });
 
-// Update service request status (approve/reject/update)
-app.put('/api/service-requests/:id', (req, res) => {
+// Update service request status (approve/reject/update) - Save to database
+app.put('/api/service-requests/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { status, adminNotes, estimatedHours, actualHours, budget, deadline } = req.body;
     
     console.log(`Updating service request ${id} with status: ${status}`);
     
-    // Find the service request
-    const requestIndex = serviceRequests.findIndex(req => req.id === id);
-    if (requestIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        message: 'Service request not found'
+    const connection = await pool.getConnection();
+    
+    try {
+      // Update service request in database
+      await connection.execute(
+        `UPDATE service_requests 
+         SET status = ?, admin_notes = ?, estimated_hours = ?, actual_hours = ?, budget = ?, deadline = ?, updated_at = NOW()
+         WHERE id = ?`,
+        [status, adminNotes, estimatedHours, actualHours, budget, deadline, id]
+      );
+      
+      // Get updated service request
+      const [rows] = await connection.execute(
+        'SELECT * FROM service_requests WHERE id = ?',
+        [id]
+      );
+      
+      connection.release();
+      
+      if (rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Service request not found'
+        });
+      }
+      
+      const dbRequest = rows[0];
+      const updatedRequest = {
+        id: dbRequest.id,
+        title: dbRequest.title,
+        description: dbRequest.description,
+        serviceType: dbRequest.service_type,
+        priority: dbRequest.priority,
+        status: dbRequest.status,
+        clientId: dbRequest.client_id,
+        clientName: dbRequest.client_name,
+        clientEmail: dbRequest.client_email,
+        preferredStartDate: dbRequest.preferred_start_date,
+        createdAt: dbRequest.created_at,
+        updatedAt: dbRequest.updated_at,
+        adminId: dbRequest.admin_id,
+        adminNotes: dbRequest.admin_notes,
+        estimatedHours: dbRequest.estimated_hours,
+        actualHours: dbRequest.actual_hours,
+        budget: dbRequest.budget,
+        deadline: dbRequest.deadline
+      };
+      
+      // Also update in memory array for immediate consistency
+      const requestIndex = serviceRequests.findIndex(req => req.id === id);
+      if (requestIndex !== -1) {
+        serviceRequests[requestIndex] = updatedRequest;
+      }
+      
+      console.log(`✅ Service request ${id} updated successfully in database:`, updatedRequest);
+      
+      res.json({
+        success: true,
+        data: updatedRequest,
+        message: `Service request ${id} updated successfully`
       });
+      
+    } catch (dbError) {
+      connection.release();
+      throw dbError;
     }
     
-    // Update the service request
-    const updatedRequest = {
-      ...serviceRequests[requestIndex],
-      status: status || serviceRequests[requestIndex].status,
-      adminNotes: adminNotes || serviceRequests[requestIndex].adminNotes,
-      estimatedHours: estimatedHours || serviceRequests[requestIndex].estimatedHours,
-      actualHours: actualHours || serviceRequests[requestIndex].actualHours,
-      budget: budget || serviceRequests[requestIndex].budget,
-      deadline: deadline || serviceRequests[requestIndex].deadline,
-      updatedAt: new Date().toISOString()
-    };
-    
-    serviceRequests[requestIndex] = updatedRequest;
-    
-    console.log(`Service request ${id} updated successfully:`, updatedRequest);
-    
-    res.json({
-      success: true,
-      data: updatedRequest,
-      message: `Service request ${id} updated successfully`
-    });
   } catch (error) {
     console.error('Update service request error:', error);
     res.status(500).json({
@@ -1009,8 +1082,8 @@ app.get('/api/service-requests/stats/overview', (req, res) => {
   });
 });
 
-// Create service request (client submission)
-app.post('/api/service-requests', (req, res) => {
+// Create service request (client submission) - Save to database
+app.post('/api/service-requests', async (req, res) => {
   try {
     const { title, description, serviceType, priority, preferredStartDate } = req.body;
     
@@ -1031,39 +1104,81 @@ app.post('/api/service-requests', (req, res) => {
       });
     }
     
-    // Create service request object
-    const serviceRequest = {
-      id: 'req-' + Date.now(),
-      title: title.trim(),
-      description: description.trim(),
-      serviceType: serviceType || 'consulting',
-      priority: priority || 'medium',
-      status: 'pending',
-      clientId: currentUser ? currentUser.id : 'anonymous',
-      clientName: currentUser ? currentUser.name : 'Anonymous User',
-      clientEmail: currentUser ? currentUser.email : 'anonymous@example.com',
-      preferredStartDate: preferredStartDate || new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      adminId: null,
-      adminNotes: null,
-      estimatedHours: null,
-      actualHours: null,
-      budget: null,
-      deadline: null
-    };
+    const connection = await pool.getConnection();
     
-    // Store the service request in memory
-    serviceRequests.push(serviceRequest);
+    try {
+      // Create service request in database
+      const requestId = 'req-' + Date.now();
+      await connection.execute(
+        `INSERT INTO service_requests (id, title, description, service_type, priority, status, client_id, client_name, client_email, preferred_start_date, created_at, updated_at) 
+         VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, NOW(), NOW())`,
+        [
+          requestId,
+          title.trim(),
+          description.trim(),
+          serviceType || 'consulting',
+          priority || 'medium',
+          currentUser ? currentUser.id : 'anonymous',
+          currentUser ? currentUser.name : 'Anonymous User',
+          currentUser ? currentUser.email : 'anonymous@example.com',
+          preferredStartDate || new Date().toISOString()
+        ]
+      );
+      
+      // Get the created service request
+      const [rows] = await connection.execute(
+        'SELECT * FROM service_requests WHERE id = ?',
+        [requestId]
+      );
+      
+      connection.release();
+      
+      if (rows.length === 0) {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create service request'
+        });
+      }
+      
+      const dbRequest = rows[0];
+      const serviceRequest = {
+        id: dbRequest.id,
+        title: dbRequest.title,
+        description: dbRequest.description,
+        serviceType: dbRequest.service_type,
+        priority: dbRequest.priority,
+        status: dbRequest.status,
+        clientId: dbRequest.client_id,
+        clientName: dbRequest.client_name,
+        clientEmail: dbRequest.client_email,
+        preferredStartDate: dbRequest.preferred_start_date,
+        createdAt: dbRequest.created_at,
+        updatedAt: dbRequest.updated_at,
+        adminId: dbRequest.admin_id,
+        adminNotes: dbRequest.admin_notes,
+        estimatedHours: dbRequest.estimated_hours,
+        actualHours: dbRequest.actual_hours,
+        budget: dbRequest.budget,
+        deadline: dbRequest.deadline
+      };
+      
+      // Also add to memory array for immediate consistency
+      serviceRequests.push(serviceRequest);
+      
+      console.log('✅ Service request created and saved to database:', serviceRequest);
+      console.log('Total service requests:', serviceRequests.length);
+      
+      res.json({
+        success: true,
+        message: 'Service request submitted successfully',
+        data: serviceRequest
+      });
+      
+    } catch (dbError) {
+      connection.release();
+      throw dbError;
+    }
     
-    console.log('Service request created and stored:', serviceRequest);
-    console.log('Total service requests:', serviceRequests.length);
-    
-    res.json({
-      success: true,
-      message: 'Service request submitted successfully',
-      data: serviceRequest
-    });
   } catch (error) {
     console.error('Service request creation error:', error);
     res.status(500).json({
