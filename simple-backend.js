@@ -1,7 +1,18 @@
 const express = require('express');
 const cors = require('cors');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: 'https://smartdesk.solutions',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
+
 const PORT = process.env.PORT || 3001;
 
 // Middleware
@@ -1122,15 +1133,6 @@ app.post('/api/messaging/public/send', (req, res) => {
   }
 });
 
-// Socket.IO mock endpoint
-app.get('/socket.io/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Socket.IO endpoint available',
-    status: 'connected'
-  });
-});
-
 // Contact endpoint
 app.post('/api/contact', (req, res) => {
   try {
@@ -1155,14 +1157,81 @@ app.post('/api/contact', (req, res) => {
   }
 });
 
+// Socket.IO server implementation
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  // Handle user joining their room
+  socket.on('join-user-room', (data) => {
+    const { userId, userRole } = data;
+    const roomName = `user-${userId}`;
+    socket.join(roomName);
+    console.log(`User ${userId} (${userRole}) joined room: ${roomName}`);
+    
+    // Join admin room if user is admin
+    if (userRole === 'admin') {
+      socket.join('admin-room');
+    }
+    
+    // Notify user is online
+    socket.broadcast.emit('user-online', { userId, userRole });
+  });
+
+  // Handle joining conversation
+  socket.on('join-conversation', (data) => {
+    const { conversationId, userId } = data;
+    socket.join(`conversation-${conversationId}`);
+    console.log(`User ${userId} joined conversation: ${conversationId}`);
+  });
+
+  // Handle leaving conversation
+  socket.on('leave-conversation', (data) => {
+    const { conversationId, userId } = data;
+    socket.leave(`conversation-${conversationId}`);
+    console.log(`User ${userId} left conversation: ${conversationId}`);
+  });
+
+  // Handle user typing
+  socket.on('user-typing', (data) => {
+    const { conversationId, userId, isTyping } = data;
+    socket.to(`conversation-${conversationId}`).emit('user-typing', {
+      userId,
+      isTyping
+    });
+  });
+
+  // Handle new message
+  socket.on('new-message', (message) => {
+    console.log('New message received:', message);
+    
+    // Broadcast to conversation room
+    socket.to(`conversation-${message.conversationId}`).emit('new-message', message);
+    
+    // Send notification to admin if message is from client/public
+    if (message.senderRole === 'client' || message.senderRole === 'public') {
+      socket.to('admin-room').emit('message-notification', {
+        conversationId: message.conversationId,
+        message
+      });
+    }
+  });
+
+  // Handle disconnect
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-app.listen(PORT, () => {
+// Start server
+server.listen(PORT, () => {
   console.log(`🚀 SIMPLE BACKEND - Running on port ${PORT}`);
   console.log('📊 In-Memory Storage Active');
   console.log('🔐 User Session Management Active');
+  console.log('🔌 Socket.IO Server Active');
   console.log('✅ All endpoints working!');
 });
