@@ -13,9 +13,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
 }));
 
-// Handle preflight requests
-app.options('/*', cors());
-
 app.use(express.json());
 
 // Database configuration
