@@ -889,65 +889,105 @@ app.get('/api/services/available', (req, res) => {
     const availableServices = [
       {
         id: 'service-1',
-        name: 'Email & Calendar Management',
+        title: 'Email & Calendar Management',
         description: 'Comprehensive email and calendar management to keep your business organized and efficient.',
         category: 'consulting',
         price: '$500/month',
         duration: 'Ongoing',
-        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        features: [
+          'Inbox triage and prioritization',
+          'Email response drafting',
+          'Calendar scheduling and management',
+          'Meeting coordination',
+          'Follow-up reminders',
+          'Email template creation'
+        ]
       },
       {
         id: 'service-2', 
-        name: 'Data Entry & Reporting',
+        title: 'Data Entry & Reporting',
         description: 'Accurate data handling and comprehensive weekly/monthly reports for informed business decisions.',
         category: 'analytics',
         price: '$1200/month',
         duration: 'Ongoing',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        features: [
+          'Data collection and validation',
+          'Statistical analysis',
+          'Report generation',
+          'Trend identification',
+          'Performance metrics',
+          'Weekly and monthly summaries'
+        ]
       },
       {
         id: 'service-3',
-        name: 'Bookkeeping & Invoicing',
+        title: 'Bookkeeping & Invoicing',
         description: 'Professional expense tracking, invoice management, and financial reconciliation services.',
         category: 'finance',
         price: '$600/month',
         duration: 'Ongoing',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-        image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+        image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        features: [
+          'Expense tracking and categorization',
+          'Invoice creation and management',
+          'Financial reconciliation',
+          'Payment processing',
+          'Financial reporting',
+          'Tax preparation support'
+        ]
       },
       {
         id: 'service-4',
-        name: 'Document Preparation',
+        title: 'Document Preparation',
         description: 'Professional document creation including contracts, presentations, and spreadsheets.',
         category: 'documentation',
         price: '$1200/month',
         duration: 'Ongoing',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+        image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        features: [
+          'Contract drafting and review',
+          'Presentation creation',
+          'Spreadsheet development',
+          'Document formatting',
+          'Template creation',
+          'Document version control'
+        ]
       },
       {
         id: 'service-5',
-        name: 'Travel & Meeting Coordination',
+        title: 'Travel & Meeting Coordination',
         description: 'Complete travel planning and meeting coordination including itineraries, bookings, and logistics.',
         category: 'coordination',
         price: '$800/month',
         duration: 'Ongoing',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-        image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+        image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        features: [
+          'Travel itinerary planning',
+          'Flight and hotel bookings',
+          'Meeting coordination',
+          'Logistics management',
+          'Expense tracking',
+          'Travel documentation'
+        ]
       },
       {
         id: 'service-6',
-        name: 'Customer Service Support',
+        title: 'Customer Service Support',
         description: 'Professional customer service management including email/chat handling and FAQ management.',
         category: 'support',
         price: '$700/month',
         duration: 'Ongoing',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        features: [
+          'Customer inquiry handling',
+          'Email and chat support',
+          'FAQ management',
+          'Support ticket management',
+          'Client feedback collection',
+          'Customer satisfaction surveys'
+        ]
       }
     ];
     
