@@ -992,10 +992,38 @@ app.put('/api/service-requests/:id', async (req, res) => {
     
     console.log(`Updating service request ${id} with status: ${status}`);
     
+    // First check if it exists in memory (for sample data)
+    const memoryRequestIndex = serviceRequests.findIndex(req => req.id === id);
+    
+    if (memoryRequestIndex !== -1) {
+      // Update in memory array (for sample data that's not in database)
+      const updatedRequest = {
+        ...serviceRequests[memoryRequestIndex],
+        status: status || serviceRequests[memoryRequestIndex].status,
+        adminNotes: adminNotes || serviceRequests[memoryRequestIndex].adminNotes,
+        estimatedHours: estimatedHours || serviceRequests[memoryRequestIndex].estimatedHours,
+        actualHours: actualHours || serviceRequests[memoryRequestIndex].actualHours,
+        budget: budget || serviceRequests[memoryRequestIndex].budget,
+        deadline: deadline || serviceRequests[memoryRequestIndex].deadline,
+        updatedAt: new Date().toISOString()
+      };
+      
+      serviceRequests[memoryRequestIndex] = updatedRequest;
+      
+      console.log(`✅ Service request ${id} updated successfully in memory:`, updatedRequest);
+      
+      return res.json({
+        success: true,
+        data: updatedRequest,
+        message: `Service request ${id} updated successfully`
+      });
+    }
+    
+    // If not in memory, try database
     const connection = await pool.getConnection();
     
     try {
-      // Check if service request exists first
+      // Check if service request exists in database
       const [existingRows] = await connection.execute(
         'SELECT id FROM service_requests WHERE id = ?',
         [id]
