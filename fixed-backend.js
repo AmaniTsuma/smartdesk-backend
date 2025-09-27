@@ -995,6 +995,20 @@ app.put('/api/service-requests/:id', async (req, res) => {
     const connection = await pool.getConnection();
     
     try {
+      // Check if service request exists first
+      const [existingRows] = await connection.execute(
+        'SELECT id FROM service_requests WHERE id = ?',
+        [id]
+      );
+      
+      if (existingRows.length === 0) {
+        connection.release();
+        return res.status(404).json({
+          success: false,
+          message: 'Service request not found'
+        });
+      }
+      
       // Update service request in database
       await connection.execute(
         `UPDATE service_requests 
@@ -1184,6 +1198,86 @@ app.post('/api/service-requests', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to create service request',
+      error: error.message
+    });
+  }
+});
+
+// Admin services endpoint (for admin portal)
+app.get('/api/service-requests/admin-services', (req, res) => {
+  try {
+    console.log('Admin services request received');
+    
+    // Return the 6 services that admin can manage
+    const adminServices = [
+      {
+        id: 'service-1',
+        name: 'Email & Calendar Management',
+        description: 'Comprehensive email and calendar management to keep your business organized and efficient.',
+        category: 'consulting',
+        price: '$500/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-2', 
+        name: 'Website Development',
+        description: 'Custom website development and design services for your business needs.',
+        category: 'development',
+        price: '$2000/project',
+        duration: '2-4 weeks',
+        status: 'active'
+      },
+      {
+        id: 'service-3',
+        name: 'Social Media Management',
+        description: 'Complete social media strategy and content management across all platforms.',
+        category: 'marketing',
+        price: '$800/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-4',
+        name: 'Data Analysis & Reporting',
+        description: 'Business data analysis and custom reporting solutions.',
+        category: 'analytics',
+        price: '$1200/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-5',
+        name: 'IT Support & Maintenance',
+        description: '24/7 IT support and system maintenance services.',
+        category: 'support',
+        price: '$1000/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-6',
+        name: 'Project Management',
+        description: 'Professional project management and coordination services.',
+        category: 'management',
+        price: '$1500/month',
+        duration: 'Ongoing',
+        status: 'active'
+      }
+    ];
+    
+    console.log(`Returning ${adminServices.length} admin services`);
+    
+    res.json({
+      success: true,
+      data: adminServices,
+      message: `Found ${adminServices.length} admin services`
+    });
+  } catch (error) {
+    console.error('Admin services error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch admin services',
       error: error.message
     });
   }
