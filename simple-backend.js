@@ -1107,6 +1107,9 @@ app.get('/api/messaging/unread-count', (req, res) => {
 
 app.get('/api/messaging/status', (req, res) => {
   try {
+    console.log('=== MESSAGING STATUS REQUEST ===');
+    console.log('Returning online status');
+    
     res.json({
       success: true,
       data: { status: 'online' }
@@ -1145,8 +1148,47 @@ app.post('/api/messaging/public/send', (req, res) => {
 });
 
 // In-memory storage for messages and conversations
-let conversations = [];
-let messages = [];
+let conversations = [
+  {
+    id: 'conv-sample-1',
+    participants: [
+      {
+        userId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+        userName: 'Amani John Tsuma',
+        userEmail: 'amanijohntsuma1@gmail.com',
+        userRole: 'client',
+        joinedAt: new Date().toISOString(),
+        isActive: true
+      }
+    ],
+    conversationType: 'client-admin',
+    title: 'Client Support',
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
+let messages = [
+  {
+    id: 'msg-sample-1',
+    senderId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+    senderName: 'Amani John Tsuma',
+    senderEmail: 'amanijohntsuma1@gmail.com',
+    senderRole: 'client',
+    content: 'hey',
+    messageType: 'text',
+    conversationId: 'conv-sample-1',
+    isRead: false,
+    isDeleted: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
+// Update conversation with last message
+conversations[0].lastMessage = messages[0];
+conversations[0].lastMessageAt = messages[0].createdAt;
 
 // Send message endpoint
 app.post('/api/messaging/send', (req, res) => {
