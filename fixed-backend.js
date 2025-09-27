@@ -391,6 +391,68 @@ app.get('/api/auth/me', async (req, res) => {
   }
 });
 
+// Update user profile endpoint
+app.put('/api/auth/profile', async (req, res) => {
+  try {
+    if (!currentUser) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access denied. Please log in.'
+      });
+    }
+
+    const { firstName, lastName, email, company, phone, address, industry, website, bio } = req.body;
+    
+    console.log('Updating profile for user:', currentUser.email, 'with data:', req.body);
+    
+    // Find the user in registeredUsers and update
+    const userIndex = registeredUsers.findIndex(u => u.email === currentUser.email);
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Update the user data
+    const updatedUser = {
+      ...registeredUsers[userIndex],
+      firstName: firstName || registeredUsers[userIndex].firstName,
+      lastName: lastName || registeredUsers[userIndex].lastName,
+      name: `${firstName || registeredUsers[userIndex].firstName} ${lastName || registeredUsers[userIndex].lastName}`,
+      email: email || registeredUsers[userIndex].email,
+      company: company || registeredUsers[userIndex].company,
+      phone: phone || registeredUsers[userIndex].phone,
+      address: address || registeredUsers[userIndex].address,
+      industry: industry || registeredUsers[userIndex].industry,
+      website: website || registeredUsers[userIndex].website,
+      bio: bio || registeredUsers[userIndex].bio,
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Update in registeredUsers array
+    registeredUsers[userIndex] = updatedUser;
+    
+    // Update currentUser session
+    currentUser = updatedUser;
+    
+    console.log('Profile updated successfully for:', currentUser.email);
+    
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: updatedUser
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update profile',
+      error: error.message
+    });
+  }
+});
+
 // Get all users from database (admin only)
 app.get('/api/auth/users', async (req, res) => {
   try {
