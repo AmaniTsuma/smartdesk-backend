@@ -171,8 +171,29 @@ app.post('/api/auth/login', async (req, res) => {
     };
 
     if (validCredentials[email] && validCredentials[email] === password) {
-      // Find user in registered users
-      const user = registeredUsers.find(u => u.email === email);
+      // Find user in registered users or create a default user
+      let user = registeredUsers.find(u => u.email === email);
+      
+      // If user not found in registeredUsers, create a default user
+      if (!user) {
+        user = {
+          id: email === 'info@smartdesk.solutions' ? 'admin-info' : 'user-' + Date.now(),
+          firstName: email === 'info@smartdesk.solutions' ? 'Admin' : 'User',
+          lastName: email === 'info@smartdesk.solutions' ? 'Info' : 'User',
+          name: email === 'info@smartdesk.solutions' ? 'Admin Info' : 'User User',
+          email: email,
+          role: email === 'info@smartdesk.solutions' ? 'admin' : 'client',
+          phone: '+1234567890',
+          company: 'Smart Desk Solutions',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        // Add to registered users if not already there
+        if (!registeredUsers.find(u => u.email === email)) {
+          registeredUsers.push(user);
+        }
+      }
       
       // Store current user session
       currentUser = user;
