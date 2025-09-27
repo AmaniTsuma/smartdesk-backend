@@ -163,20 +163,33 @@ app.post('/api/auth/login', async (req, res) => {
     
     console.log('Login attempt for:', email);
     
-    // Simple authentication (in production, use bcrypt for password hashing)
+    // Check authentication against registered users (including updated passwords)
+    const user = registeredUsers.find(u => u.email === email);
+    
+    // Fallback to hardcoded credentials for initial users
     const validCredentials = {
       'info@smartdesk.solutions': 'admin123',
       'amanijohntsuma1@gmail.com': 'amani123',
       'admin@smartdesk.com': 'admin123'
     };
+    
+    let isValidPassword = false;
+    let foundUser = user;
+    
+    if (user && user.password) {
+      // Use the password from registeredUsers (including updated passwords)
+      isValidPassword = user.password === password;
+      console.log(`Checking password for ${email}: stored=${user.password}, provided=${password}, match=${isValidPassword}`);
+    } else if (validCredentials[email]) {
+      // Fallback to hardcoded credentials
+      isValidPassword = validCredentials[email] === password;
+      console.log(`Using hardcoded credentials for ${email}: match=${isValidPassword}`);
+    }
 
-    if (validCredentials[email] && validCredentials[email] === password) {
-      // Find user in registered users or create a default user
-      let user = registeredUsers.find(u => u.email === email);
-      
-      // If user not found in registeredUsers, create a default user
-      if (!user) {
-        user = {
+    if (isValidPassword) {
+      // Use the found user or create a default user
+      if (!foundUser) {
+        foundUser = {
           id: email === 'info@smartdesk.solutions' ? 'admin-info' : 'user-' + Date.now(),
           firstName: email === 'info@smartdesk.solutions' ? 'Admin' : 'User',
           lastName: email === 'info@smartdesk.solutions' ? 'Info' : 'User',
@@ -191,12 +204,12 @@ app.post('/api/auth/login', async (req, res) => {
         
         // Add to registered users if not already there
         if (!registeredUsers.find(u => u.email === email)) {
-          registeredUsers.push(user);
+          registeredUsers.push(foundUser);
         }
       }
       
       // Store current user session
-      currentUser = user;
+      currentUser = foundUser;
       
       console.log('User logged in:', currentUser);
       
