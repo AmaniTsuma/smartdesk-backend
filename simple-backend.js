@@ -514,7 +514,7 @@ app.get('/api/service-requests/public', (req, res) => {
         category: 'consulting',
         price: '$500/month',
         duration: 'Ongoing',
-        status: 'active'
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-2', 
@@ -523,7 +523,8 @@ app.get('/api/service-requests/public', (req, res) => {
         category: 'development',
         price: '$2000/project',
         duration: '2-4 weeks',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-3',
@@ -532,7 +533,9 @@ app.get('/api/service-requests/public', (req, res) => {
         category: 'marketing',
         price: '$800/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-4',
@@ -541,7 +544,9 @@ app.get('/api/service-requests/public', (req, res) => {
         category: 'analytics',
         price: '$1200/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-5',
@@ -550,7 +555,9 @@ app.get('/api/service-requests/public', (req, res) => {
         category: 'support',
         price: '$1000/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-6',
@@ -559,7 +566,9 @@ app.get('/api/service-requests/public', (req, res) => {
         category: 'management',
         price: '$1500/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&crop=center'
       }
     ];
     
@@ -616,7 +625,7 @@ app.get('/api/service-requests/admin-services', (req, res) => {
         category: 'consulting',
         price: '$500/month',
         duration: 'Ongoing',
-        status: 'active'
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-2', 
@@ -625,7 +634,8 @@ app.get('/api/service-requests/admin-services', (req, res) => {
         category: 'development',
         price: '$2000/project',
         duration: '2-4 weeks',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-3',
@@ -634,7 +644,9 @@ app.get('/api/service-requests/admin-services', (req, res) => {
         category: 'marketing',
         price: '$800/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-4',
@@ -643,7 +655,9 @@ app.get('/api/service-requests/admin-services', (req, res) => {
         category: 'analytics',
         price: '$1200/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-5',
@@ -652,7 +666,9 @@ app.get('/api/service-requests/admin-services', (req, res) => {
         category: 'support',
         price: '$1000/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-6',
@@ -661,7 +677,9 @@ app.get('/api/service-requests/admin-services', (req, res) => {
         category: 'management',
         price: '$1500/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&crop=center'
       }
     ];
     
@@ -875,7 +893,7 @@ app.get('/api/services/available', (req, res) => {
         category: 'consulting',
         price: '$500/month',
         duration: 'Ongoing',
-        status: 'active'
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-2', 
@@ -884,7 +902,8 @@ app.get('/api/services/available', (req, res) => {
         category: 'development',
         price: '$2000/project',
         duration: '2-4 weeks',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-3',
@@ -893,7 +912,9 @@ app.get('/api/services/available', (req, res) => {
         category: 'marketing',
         price: '$800/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-4',
@@ -902,7 +923,9 @@ app.get('/api/services/available', (req, res) => {
         category: 'analytics',
         price: '$1200/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-5',
@@ -911,7 +934,9 @@ app.get('/api/services/available', (req, res) => {
         category: 'support',
         price: '$1000/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&crop=center'
       },
       {
         id: 'service-6',
@@ -920,7 +945,9 @@ app.get('/api/services/available', (req, res) => {
         category: 'management',
         price: '$1500/month',
         duration: 'Ongoing',
-        status: 'active'
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
+        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&crop=center'
       }
     ];
     
@@ -980,7 +1007,7 @@ app.get('/api/service-requests/client-dashboard-stats', (req, res) => {
     const clientRequests = serviceRequests.filter(req => req.clientId === currentUser?.id);
     
     const stats = {
-      activeServices: clientRequests.filter(req => req.status === 'in-progress').length,
+      activeServices: 6, // Total number of available services
       completedServices: clientRequests.filter(req => req.status === 'completed').length,
       pendingRequests: clientRequests.filter(req => req.status === 'pending').length,
       rejectedRequests: clientRequests.filter(req => req.status === 'rejected').length
