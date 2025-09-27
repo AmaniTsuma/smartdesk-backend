@@ -631,9 +631,14 @@ app.get('/api/auth/dashboard-stats', async (req, res) => {
     console.log('Dashboard stats requested - currentUser:', currentUser ? currentUser.email : 'none');
 
     // Calculate real stats from stored data
+    console.log(`Total service requests: ${serviceRequests.length}`);
+    console.log(`Service requests statuses:`, serviceRequests.map(req => ({ id: req.id, title: req.title, status: req.status })));
+    
     const completedServices = serviceRequests.filter(req => req.status === 'completed').length;
     const pendingRequests = serviceRequests.filter(req => req.status === 'pending').length;
     const rejectedRequests = serviceRequests.filter(req => req.status === 'rejected').length;
+    
+    console.log(`Calculated stats - Completed: ${completedServices}, Pending: ${pendingRequests}, Rejected: ${rejectedRequests}`);
     
     const stats = {
       totalUsers: registeredUsers.length,
@@ -643,7 +648,7 @@ app.get('/api/auth/dashboard-stats', async (req, res) => {
       activeConversations: 8 // Mock conversations
     };
 
-    console.log(`Admin dashboard stats for ${currentUser.name}:`, stats);
+    console.log(`Admin dashboard stats for ${currentUser ? currentUser.name : 'unknown'}:`, stats);
 
     res.json({
       success: true,
