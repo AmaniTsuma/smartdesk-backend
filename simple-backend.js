@@ -79,13 +79,16 @@ let serviceRequests = [
     estimatedHours: null,
     actualHours: null,
     budget: null,
-    deadline: null
+    deadline: null,
+    category: 'consulting',
+    company: 'AFRETEF',
+    phone: '0715896449'
   },
   {
     id: 'req-sample-2',
-    title: 'Website Development Project',
-    description: 'Custom website development and design services for your business needs.',
-    serviceType: 'development',
+    title: 'Data Entry & Reporting',
+    description: 'Accurate data handling and comprehensive weekly/monthly reports for informed business decisions.',
+    serviceType: 'analytics',
     priority: 'high',
     status: 'in-progress',
     clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
@@ -103,9 +106,9 @@ let serviceRequests = [
   },
   {
     id: 'req-sample-3',
-    title: 'Social Media Management',
-    description: 'Complete social media strategy and content management across all platforms.',
-    serviceType: 'marketing',
+    title: 'Bookkeeping & Invoicing',
+    description: 'Professional expense tracking, invoice management, and financial reconciliation services.',
+    serviceType: 'finance',
     priority: 'low',
     status: 'completed',
     clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
@@ -514,61 +517,60 @@ app.get('/api/service-requests/public', (req, res) => {
         category: 'consulting',
         price: '$500/month',
         duration: 'Ongoing',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       },
       {
         id: 'service-2', 
-        name: 'Website Development',
-        description: 'Custom website development and design services for your business needs.',
-        category: 'development',
-        price: '$2000/project',
-        duration: '2-4 weeks',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center'
-      },
-      {
-        id: 'service-3',
-        name: 'Social Media Management',
-        description: 'Complete social media strategy and content management across all platforms.',
-        category: 'marketing',
-        price: '$800/month',
-        duration: 'Ongoing',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center'
-      },
-      {
-        id: 'service-4',
-        name: 'Data Analysis & Reporting',
-        description: 'Business data analysis and custom reporting solutions.',
+        name: 'Data Entry & Reporting',
+        description: 'Accurate data handling and comprehensive weekly/monthly reports for informed business decisions.',
         category: 'analytics',
         price: '$1200/month',
         duration: 'Ongoing',
         status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+      },
+      {
+        id: 'service-3',
+        name: 'Bookkeeping & Invoicing',
+        description: 'Professional expense tracking, invoice management, and financial reconciliation services.',
+        category: 'finance',
+        price: '$600/month',
+        duration: 'Ongoing',
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+      },
+      {
+        id: 'service-4',
+        name: 'Document Preparation',
+        description: 'Professional document creation including contracts, presentations, and spreadsheets.',
+        category: 'documentation',
+        price: '$1200/month',
+        duration: 'Ongoing',
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       },
       {
         id: 'service-5',
-        name: 'IT Support & Maintenance',
-        description: '24/7 IT support and system maintenance services.',
-        category: 'support',
-        price: '$1000/month',
+        name: 'Travel & Meeting Coordination',
+        description: 'Complete travel planning and meeting coordination including itineraries, bookings, and logistics.',
+        category: 'coordination',
+        price: '$800/month',
         duration: 'Ongoing',
         status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       },
       {
         id: 'service-6',
-        name: 'Project Management',
-        description: 'Professional project management and coordination services.',
-        category: 'management',
-        price: '$1500/month',
+        name: 'Customer Service Support',
+        description: 'Professional customer service management including email/chat handling and FAQ management.',
+        category: 'support',
+        price: '$700/month',
         duration: 'Ongoing',
         status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       }
     ];
     
@@ -625,61 +627,60 @@ app.get('/api/service-requests/admin-services', (req, res) => {
         category: 'consulting',
         price: '$500/month',
         duration: 'Ongoing',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       },
       {
         id: 'service-2', 
-        name: 'Website Development',
-        description: 'Custom website development and design services for your business needs.',
-        category: 'development',
-        price: '$2000/project',
-        duration: '2-4 weeks',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center'
-      },
-      {
-        id: 'service-3',
-        name: 'Social Media Management',
-        description: 'Complete social media strategy and content management across all platforms.',
-        category: 'marketing',
-        price: '$800/month',
-        duration: 'Ongoing',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center'
-      },
-      {
-        id: 'service-4',
-        name: 'Data Analysis & Reporting',
-        description: 'Business data analysis and custom reporting solutions.',
+        name: 'Data Entry & Reporting',
+        description: 'Accurate data handling and comprehensive weekly/monthly reports for informed business decisions.',
         category: 'analytics',
         price: '$1200/month',
         duration: 'Ongoing',
         status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+      },
+      {
+        id: 'service-3',
+        name: 'Bookkeeping & Invoicing',
+        description: 'Professional expense tracking, invoice management, and financial reconciliation services.',
+        category: 'finance',
+        price: '$600/month',
+        duration: 'Ongoing',
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+      },
+      {
+        id: 'service-4',
+        name: 'Document Preparation',
+        description: 'Professional document creation including contracts, presentations, and spreadsheets.',
+        category: 'documentation',
+        price: '$1200/month',
+        duration: 'Ongoing',
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       },
       {
         id: 'service-5',
-        name: 'IT Support & Maintenance',
-        description: '24/7 IT support and system maintenance services.',
-        category: 'support',
-        price: '$1000/month',
+        name: 'Travel & Meeting Coordination',
+        description: 'Complete travel planning and meeting coordination including itineraries, bookings, and logistics.',
+        category: 'coordination',
+        price: '$800/month',
         duration: 'Ongoing',
         status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       },
       {
         id: 'service-6',
-        name: 'Project Management',
-        description: 'Professional project management and coordination services.',
-        category: 'management',
-        price: '$1500/month',
+        name: 'Customer Service Support',
+        description: 'Professional customer service management including email/chat handling and FAQ management.',
+        category: 'support',
+        price: '$700/month',
         duration: 'Ongoing',
         status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       }
     ];
     
@@ -893,61 +894,60 @@ app.get('/api/services/available', (req, res) => {
         category: 'consulting',
         price: '$500/month',
         duration: 'Ongoing',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       },
       {
         id: 'service-2', 
-        name: 'Website Development',
-        description: 'Custom website development and design services for your business needs.',
-        category: 'development',
-        price: '$2000/project',
-        duration: '2-4 weeks',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center'
-      },
-      {
-        id: 'service-3',
-        name: 'Social Media Management',
-        description: 'Complete social media strategy and content management across all platforms.',
-        category: 'marketing',
-        price: '$800/month',
-        duration: 'Ongoing',
-        status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center'
-      },
-      {
-        id: 'service-4',
-        name: 'Data Analysis & Reporting',
-        description: 'Business data analysis and custom reporting solutions.',
+        name: 'Data Entry & Reporting',
+        description: 'Accurate data handling and comprehensive weekly/monthly reports for informed business decisions.',
         category: 'analytics',
         price: '$1200/month',
         duration: 'Ongoing',
         status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+      },
+      {
+        id: 'service-3',
+        name: 'Bookkeeping & Invoicing',
+        description: 'Professional expense tracking, invoice management, and financial reconciliation services.',
+        category: 'finance',
+        price: '$600/month',
+        duration: 'Ongoing',
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
+      },
+      {
+        id: 'service-4',
+        name: 'Document Preparation',
+        description: 'Professional document creation including contracts, presentations, and spreadsheets.',
+        category: 'documentation',
+        price: '$1200/month',
+        duration: 'Ongoing',
+        status: 'active',
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       },
       {
         id: 'service-5',
-        name: 'IT Support & Maintenance',
-        description: '24/7 IT support and system maintenance services.',
-        category: 'support',
-        price: '$1000/month',
+        name: 'Travel & Meeting Coordination',
+        description: 'Complete travel planning and meeting coordination including itineraries, bookings, and logistics.',
+        category: 'coordination',
+        price: '$800/month',
         duration: 'Ongoing',
         status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
+        image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       },
       {
         id: 'service-6',
-        name: 'Project Management',
-        description: 'Professional project management and coordination services.',
-        category: 'management',
-        price: '$1500/month',
+        name: 'Customer Service Support',
+        description: 'Professional customer service management including email/chat handling and FAQ management.',
+        category: 'support',
+        price: '$700/month',
         duration: 'Ongoing',
         status: 'active',
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center',
-        image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop&crop=center'
+        image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'
       }
     ];
     
