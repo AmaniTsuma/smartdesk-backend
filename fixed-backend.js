@@ -310,11 +310,11 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 // User profile endpoint - returns the ACTUAL logged in user
-app.get('/api/auth/me', async (req, res) => {
+app.get('/api/auth/profile', async (req, res) => {
   try {
     // Check if we have a current user session
     if (currentUser) {
-      console.log('Returning current user:', currentUser.email, currentUser.role);
+      console.log('Returning current user profile:', currentUser.email, currentUser.role);
       return res.json({
         success: true,
         data: currentUser
@@ -342,6 +342,47 @@ app.get('/api/auth/me', async (req, res) => {
     });
   } catch (error) {
     console.error('Get user profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user profile',
+      error: error.message
+    });
+  }
+});
+
+// User profile endpoint - alias for /profile
+app.get('/api/auth/me', async (req, res) => {
+  try {
+    // Check if we have a current user session
+    if (currentUser) {
+      console.log('Returning current user (me):', currentUser.email, currentUser.role);
+      return res.json({
+        success: true,
+        data: currentUser
+      });
+    }
+
+    // Temporarily return admin user for debugging
+    console.log('No current user session found, returning admin user for debugging');
+    const adminUser = {
+      id: 'admin-1',
+      firstName: 'Admin',
+      lastName: 'User',
+      name: 'Admin User',
+      email: 'info@smartdesk.solutions',
+      role: 'admin',
+      phone: '+1234567890',
+      company: 'Smart Desk Solutions',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    res.json({
+      success: true,
+      data: adminUser
+    });
+  } catch (error) {
+    console.error('Get user profile (me) error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user profile',
