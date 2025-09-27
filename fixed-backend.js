@@ -256,11 +256,28 @@ app.post('/api/auth/register', async (req, res) => {
     
     console.log('Registration attempt:', { firstName, lastName, email, company, phone });
     
-    // Simple validation
+    // Enhanced validation
     if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({
         success: false,
         message: 'Please fill in all required fields'
+      });
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid email address'
+      });
+    }
+    
+    // Password validation
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long'
       });
     }
     
@@ -338,7 +355,12 @@ app.post('/api/auth/register', async (req, res) => {
       
     } catch (dbError) {
       connection.release();
-      throw dbError;
+      console.error('Database error during registration:', dbError);
+      return res.status(500).json({
+        success: false,
+        message: 'Database error during registration',
+        error: dbError.message
+      });
     }
     
   } catch (error) {
