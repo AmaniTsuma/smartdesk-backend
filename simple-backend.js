@@ -980,10 +980,9 @@ app.get('/api/service-requests/client-dashboard-stats', (req, res) => {
     const clientRequests = serviceRequests.filter(req => req.clientId === currentUser?.id);
     
     const stats = {
-      totalRequests: clientRequests.length,
+      activeServices: clientRequests.filter(req => req.status === 'in-progress').length,
+      completedServices: clientRequests.filter(req => req.status === 'completed').length,
       pendingRequests: clientRequests.filter(req => req.status === 'pending').length,
-      inProgressRequests: clientRequests.filter(req => req.status === 'in-progress').length,
-      completedRequests: clientRequests.filter(req => req.status === 'completed').length,
       rejectedRequests: clientRequests.filter(req => req.status === 'rejected').length
     };
     
