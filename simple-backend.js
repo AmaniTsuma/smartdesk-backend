@@ -5,12 +5,196 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'https://smartdesk.solutions',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept']
+}));
 app.use(express.json());
 
-// Basic routes
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'Simple backend is working! - Updated with 6 services' });
+// In-memory storage for users
+let users = [
+  {
+    id: 'admin-1',
+    email: 'info@smartdesk.solutions',
+    firstName: 'Smart Desk',
+    lastName: 'Solutions',
+    name: 'Smart Desk Solutions',
+    role: 'admin',
+    isActive: true,
+    company: 'Smart Desk Solutions',
+    phone: '',
+    password: 'admin123',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+    email: 'amanijohntsuma1@gmail.com',
+    firstName: 'Amani John',
+    lastName: 'Tsuma',
+    name: 'Amani John Tsuma',
+    role: 'client',
+    isActive: true,
+    company: 'AFRETEF',
+    phone: '0715896449',
+    password: 'amani123',
+    createdAt: '2025-09-20T12:29:41.597Z',
+    updatedAt: new Date().toISOString()
+  }
+];
+
+// Current user session
+let currentUser = null;
+
+// Registration endpoint - BULLETPROOF VERSION
+app.post('/api/auth/register', (req, res) => {
+  try {
+    console.log('=== REGISTRATION REQUEST RECEIVED ===');
+    console.log('Request body:', req.body);
+    
+    const { firstName, lastName, email, password, company, phone } = req.body;
+    
+    // Enhanced validation
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please fill in all required fields'
+      });
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid email address'
+      });
+    }
+    
+    // Password validation
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      });
+    }
+    
+    // Check if email already exists
+    const existingUser = users.find(user => user.email === email);
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already exists'
+      });
+    }
+    
+    // Create new user
+    const userId = 'user-' + Date.now();
+    const newUser = {
+      id: userId,
+      email: email,
+      firstName: firstName,
+      lastName: lastName,
+      name: `${firstName} ${lastName}`,
+      role: 'client',
+      isActive: true,
+      company: company || '',
+      phone: phone || '',
+      password: password,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Add to users array
+    users.push(newUser);
+    
+    // Set as current user
+    currentUser = newUser;
+    
+    console.log('✅ New user registered successfully:', newUser);
+    
+    res.json({
+      success: true,
+      message: 'Registration successful',
+      data: {
+        user: newUser,
+        token: 'jwt-token-' + Date.now()
+      }
+    });
+    
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Registration failed',
+      error: error.message
+    });
+  }
+});
+
+// Login endpoint
+app.post('/api/auth/login', (req, res) => {
+  try {
+    console.log('=== LOGIN REQUEST RECEIVED ===');
+    console.log('Request body:', req.body);
+    
+    const { email, password } = req.body;
+    
+    // Find user
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+      currentUser = user;
+      console.log('✅ User logged in:', user);
+      
+      res.json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          user: user,
+          token: 'jwt-token-' + Date.now()
+        }
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Login failed',
+      error: error.message
+    });
+  }
+});
+
+// Get current user
+app.get('/api/auth/me', (req, res) => {
+  if (currentUser) {
+    res.json({
+      success: true,
+      data: currentUser
+    });
+  } else {
+    res.status(401).json({
+      success: false,
+      message: 'Not authenticated'
+    });
+  }
+});
+
+// Logout endpoint
+app.post('/api/auth/logout', (req, res) => {
+  currentUser = null;
+  res.json({
+    success: true,
+    message: 'Logout successful'
+  });
 });
 
 app.get('/api/service-requests/public', (req, res) => {
