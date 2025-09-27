@@ -416,9 +416,9 @@ app.put('/api/auth/profile', async (req, res) => {
       });
     }
 
-    const { firstName, lastName, email, company, phone, address, industry, website, bio } = req.body;
+    const { firstName, lastName, email, company, phone, address, industry, website, bio, password } = req.body;
     
-    console.log('Updating profile for user:', currentUser.email, 'with data:', req.body);
+    console.log('Updating profile for user:', currentUser.email, 'with data:', req.body, 'hasPassword:', !!password);
     
     // Find the user in registeredUsers and update
     const userIndex = registeredUsers.findIndex(u => u.email === currentUser.email);
@@ -442,6 +442,7 @@ app.put('/api/auth/profile', async (req, res) => {
       industry: industry || registeredUsers[userIndex].industry,
       website: website || registeredUsers[userIndex].website,
       bio: bio || registeredUsers[userIndex].bio,
+      password: password || registeredUsers[userIndex].password, // Include password update
       updatedAt: new Date().toISOString()
     };
     
