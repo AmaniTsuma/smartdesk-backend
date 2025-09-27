@@ -162,9 +162,11 @@ app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
     
     console.log('Login attempt for:', email);
+    console.log('Current registeredUsers:', registeredUsers.map(u => ({ email: u.email, hasPassword: !!u.password })));
     
     // Check authentication against registered users (including updated passwords)
     const user = registeredUsers.find(u => u.email === email);
+    console.log('Found user:', user ? { email: user.email, hasPassword: !!user.password, password: user.password } : 'none');
     
     // Fallback to hardcoded credentials for initial users
     const validCredentials = {
