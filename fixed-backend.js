@@ -6,7 +6,26 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://smartdesk.solutions', 'http://localhost:3000', 'http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Add explicit CORS headers for all requests
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(express.json());
 
 // Database configuration
@@ -159,6 +178,10 @@ app.get('/api/test', (req, res) => {
 // Login endpoint with proper session management
 app.post('/api/auth/login', async (req, res) => {
   try {
+    console.log('=== LOGIN REQUEST RECEIVED ===');
+    console.log('Request body:', req.body);
+    console.log('Request headers:', req.headers);
+    
     const { email, password } = req.body;
     
     console.log('Login attempt for:', email);
