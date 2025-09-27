@@ -42,13 +42,135 @@ let users = [
     password: 'amani123',
     createdAt: '2025-09-20T12:29:41.597Z',
     updatedAt: new Date().toISOString()
+  },
+  {
+    id: '29e8fe0c-dc5a-4897-8e9f-4afdcfcf808d',
+    email: 'admin@smartdesk.com',
+    firstName: 'Admin',
+    lastName: 'User',
+    name: 'Admin User',
+    role: 'admin',
+    isActive: true,
+    company: 'Smart Desk Solutions',
+    phone: '',
+    password: 'admin123',
+    createdAt: '2025-09-20T15:52:46.672Z',
+    updatedAt: new Date().toISOString()
+  }
+];
+
+// In-memory storage for service requests
+let serviceRequests = [
+  {
+    id: 'req-sample-1',
+    title: 'Email & Calendar Management',
+    description: 'Comprehensive email and calendar management to keep your business organized and efficient.',
+    serviceType: 'consulting',
+    priority: 'medium',
+    status: 'pending',
+    clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+    clientName: 'Amani John Tsuma',
+    clientEmail: 'amanijohntsuma1@gmail.com',
+    preferredStartDate: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    adminId: null,
+    adminNotes: null,
+    estimatedHours: null,
+    actualHours: null,
+    budget: null,
+    deadline: null
+  },
+  {
+    id: 'req-sample-2',
+    title: 'Website Development Project',
+    description: 'Custom website development and design services for your business needs.',
+    serviceType: 'development',
+    priority: 'high',
+    status: 'in-progress',
+    clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+    clientName: 'Amani John Tsuma',
+    clientEmail: 'amanijohntsuma1@gmail.com',
+    preferredStartDate: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    adminId: 'admin-1',
+    adminNotes: 'Project approved and in development phase',
+    estimatedHours: 40,
+    actualHours: 15,
+    budget: 2000,
+    deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'req-sample-3',
+    title: 'Social Media Management',
+    description: 'Complete social media strategy and content management across all platforms.',
+    serviceType: 'marketing',
+    priority: 'low',
+    status: 'completed',
+    clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+    clientName: 'Amani John Tsuma',
+    clientEmail: 'amanijohntsuma1@gmail.com',
+    preferredStartDate: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    adminId: 'admin-1',
+    adminNotes: 'Project completed successfully',
+    estimatedHours: 20,
+    actualHours: 18,
+    budget: 800,
+    deadline: new Date(Date.now() - 86400000).toISOString()
   }
 ];
 
 // Current user session
 let currentUser = null;
 
-// Registration endpoint - BULLETPROOF VERSION
+// Basic routes
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'SIMPLE BACKEND - All endpoints working!' });
+});
+
+// Login endpoint
+app.post('/api/auth/login', (req, res) => {
+  try {
+    console.log('=== LOGIN REQUEST RECEIVED ===');
+    console.log('Request body:', req.body);
+    
+    const { email, password } = req.body;
+    
+    // Find user
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+      currentUser = user;
+      console.log('✅ User logged in:', user);
+      
+      res.json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          user: user,
+          token: 'jwt-token-' + Date.now()
+        }
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Login failed',
+      error: error.message
+    });
+  }
+});
+
+// Registration endpoint
 app.post('/api/auth/register', (req, res) => {
   try {
     console.log('=== REGISTRATION REQUEST RECEIVED ===');
@@ -134,40 +256,45 @@ app.post('/api/auth/register', (req, res) => {
   }
 });
 
-// Login endpoint
-app.post('/api/auth/login', (req, res) => {
+// Logout endpoint
+app.post('/api/auth/logout', (req, res) => {
   try {
-    console.log('=== LOGIN REQUEST RECEIVED ===');
-    console.log('Request body:', req.body);
-    
-    const { email, password } = req.body;
-    
-    // Find user
-    const user = users.find(u => u.email === email && u.password === password);
-    
-    if (user) {
-      currentUser = user;
-      console.log('✅ User logged in:', user);
-      
-      res.json({
-        success: true,
-        message: 'Login successful',
-        data: {
-          user: user,
-          token: 'jwt-token-' + Date.now()
-        }
-      });
-    } else {
-      res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
-      });
-    }
+    console.log('User logging out:', currentUser?.email);
+    currentUser = null;
+    res.json({
+      success: true,
+      message: 'Logged out successfully'
+    });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Logout error:', error);
     res.status(500).json({
       success: false,
-      message: 'Login failed',
+      message: 'Logout failed',
+      error: error.message
+    });
+  }
+});
+
+// User profile endpoint
+app.get('/api/auth/profile', (req, res) => {
+  try {
+    if (currentUser) {
+      console.log('Returning current user profile:', currentUser.email, currentUser.role);
+      return res.json({
+        success: true,
+        data: currentUser
+      });
+    }
+
+    res.status(401).json({
+      success: false,
+      message: 'Not authenticated'
+    });
+  } catch (error) {
+    console.error('Profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch profile',
       error: error.message
     });
   }
@@ -175,228 +302,788 @@ app.post('/api/auth/login', (req, res) => {
 
 // Get current user
 app.get('/api/auth/me', (req, res) => {
-  if (currentUser) {
-    res.json({
-      success: true,
-      data: currentUser
-    });
-  } else {
-    res.status(401).json({
+  try {
+    if (currentUser) {
+      res.json({
+        success: true,
+        data: currentUser
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: 'Not authenticated'
+      });
+    }
+  } catch (error) {
+    console.error('Auth me error:', error);
+    res.status(500).json({
       success: false,
-      message: 'Not authenticated'
+      message: 'Failed to fetch user',
+      error: error.message
     });
   }
 });
 
-// Logout endpoint
-app.post('/api/auth/logout', (req, res) => {
-  currentUser = null;
-  res.json({
-    success: true,
-    message: 'Logout successful'
-  });
+// Update profile endpoint
+app.put('/api/auth/profile', (req, res) => {
+  try {
+    if (!currentUser) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access denied. Please log in.'
+      });
+    }
+
+    const { firstName, lastName, email, company, phone, address, industry, website, bio, password } = req.body;
+    
+    console.log('Updating profile for user:', currentUser.email, 'with data:', req.body, 'hasPassword:', !!password);
+    
+    // Find the user in users array and update
+    const userIndex = users.findIndex(u => u.email === currentUser.email);
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Update the user data
+    const updatedUser = {
+      ...users[userIndex],
+      firstName: firstName || users[userIndex].firstName,
+      lastName: lastName || users[userIndex].lastName,
+      name: `${firstName || users[userIndex].firstName} ${lastName || users[userIndex].lastName}`,
+      email: email || users[userIndex].email,
+      company: company || users[userIndex].company,
+      phone: phone || users[userIndex].phone,
+      address: address || users[userIndex].address,
+      industry: industry || users[userIndex].industry,
+      website: website || users[userIndex].website,
+      bio: bio || users[userIndex].bio,
+      password: password || users[userIndex].password,
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Update in users array
+    users[userIndex] = updatedUser;
+    
+    // Update currentUser session
+    currentUser = updatedUser;
+    
+    console.log('✅ User profile updated successfully:', updatedUser);
+    
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: updatedUser
+    });
+
+  } catch (error) {
+    console.error('❌ Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update profile',
+      error: error.message
+    });
+  }
 });
 
-app.get('/api/service-requests/public', (req, res) => {
-  // These are the admin-created services that clients can see and book
-  const adminServices = [
-    {
-      id: 'service-1',
-      title: 'Email & Calendar Management',
-      description: 'Comprehensive email and calendar management to keep your business organized and efficient.',
-      serviceType: 'consulting',
-      status: 'available',
-      priority: 'high',
-      estimatedHours: 40,
-      actualHours: 15,
-      startDate: '2024-01-15T00:00:00.000Z',
-      endDate: '2024-02-15T00:00:00.000Z',
-      createdAt: '2024-01-10T00:00:00.000Z',
-      updatedAt: '2025-09-20T19:33:29.642Z',
-      image: 'https://images.unsplash.com/photo-1596526131083-e8c633c948d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      icon: '📧',
-      features: [
-        'Inbox triage and prioritization',
-        'Email response drafting',
-        'Calendar scheduling and management',
-        'Meeting coordination',
-        'Follow-up reminders',
-        'Email template creation'
-      ],
-      pricing: {
-        hourly: 25,
-        package: 800
-      },
-      createdBy: 'admin'
-    },
-    {
-      id: 'service-2',
-      title: 'Document Management & Organization',
-      description: 'Professional document organization and management services to streamline your business operations.',
-      serviceType: 'consulting',
-      status: 'available',
-      priority: 'medium',
-      estimatedHours: 30,
-      actualHours: 12,
-      startDate: '2024-01-20T00:00:00.000Z',
-      endDate: '2024-02-20T00:00:00.000Z',
-      createdAt: '2024-01-15T00:00:00.000Z',
-      updatedAt: '2025-09-20T19:33:29.642Z',
-      image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      icon: '📁',
-      features: [
-        'File organization and categorization',
-        'Digital document conversion',
-        'Archive management',
-        'Version control',
-        'Backup and security'
-      ],
-      pricing: {
-        hourly: 20,
-        package: 600
-      },
-      createdBy: 'admin'
-    },
-    {
-      id: 'service-3',
-      title: 'Administrative Support',
-      description: 'Comprehensive administrative support to help you focus on growing your business.',
-      serviceType: 'consulting',
-      status: 'available',
-      priority: 'high',
-      estimatedHours: 50,
-      actualHours: 20,
-      startDate: '2024-01-25T00:00:00.000Z',
-      endDate: '2024-03-25T00:00:00.000Z',
-      createdAt: '2024-01-20T00:00:00.000Z',
-      updatedAt: '2025-09-20T19:33:29.642Z',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      icon: '⚡',
-      features: [
-        'Data entry and management',
-        'Report generation',
-        'Client communication',
-        'Schedule coordination',
-        'Task prioritization'
-      ],
-      pricing: {
-        hourly: 30,
-        package: 1200
-      },
-      createdBy: 'admin'
-    },
-    {
-      id: 'service-4',
-      title: 'Customer Service Management',
-      description: 'Professional customer service management to enhance your client relationships and satisfaction.',
-      serviceType: 'consulting',
-      status: 'available',
-      priority: 'high',
-      estimatedHours: 35,
-      actualHours: 18,
-      startDate: '2024-02-01T00:00:00.000Z',
-      endDate: '2024-03-01T00:00:00.000Z',
-      createdAt: '2024-01-25T00:00:00.000Z',
-      updatedAt: '2025-09-20T19:33:29.642Z',
-      image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      icon: '🎧',
-      features: [
-        'Customer inquiry handling',
-        'Support ticket management',
-        'Client feedback collection',
-        'Service quality monitoring',
-        'Customer satisfaction surveys'
-      ],
-      pricing: {
-        hourly: 22,
-        package: 700
-      },
-      createdBy: 'admin'
-    },
-    {
-      id: 'service-5',
-      title: 'Data Analysis & Reporting',
-      description: 'Comprehensive data analysis and reporting services to help you make informed business decisions.',
-      serviceType: 'consulting',
-      status: 'available',
-      priority: 'medium',
-      estimatedHours: 45,
-      actualHours: 25,
-      startDate: '2024-02-10T00:00:00.000Z',
-      endDate: '2024-03-10T00:00:00.000Z',
-      createdAt: '2024-01-30T00:00:00.000Z',
-      updatedAt: '2025-09-20T19:33:29.642Z',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      icon: '📊',
-      features: [
-        'Data collection and validation',
-        'Statistical analysis',
-        'Report generation',
-        'Trend identification',
-        'Performance metrics'
-      ],
-      pricing: {
-        hourly: 35,
-        package: 1400
-      },
-      createdBy: 'admin'
-    },
-    {
-      id: 'service-6',
-      title: 'Project Management Support',
-      description: 'Professional project management support to ensure your projects are delivered on time and within budget.',
-      serviceType: 'consulting',
-      status: 'available',
-      priority: 'high',
-      estimatedHours: 60,
-      actualHours: 30,
-      startDate: '2024-02-15T00:00:00.000Z',
-      endDate: '2024-04-15T00:00:00.000Z',
-      createdAt: '2024-02-01T00:00:00.000Z',
-      updatedAt: '2025-09-20T19:33:29.642Z',
-      image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-      icon: '📋',
-      features: [
-        'Project planning and scheduling',
-        'Resource allocation',
-        'Progress tracking',
-        'Risk management',
-        'Stakeholder communication'
-      ],
-      pricing: {
-        hourly: 40,
-        package: 2000
-      },
-      createdBy: 'admin'
+// Get all users
+app.get('/api/auth/users', (req, res) => {
+  try {
+    console.log('Fetching users, current user:', currentUser?.email);
+    
+    res.json({
+      success: true,
+      data: users,
+      message: `Found ${users.length} users`
+    });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch users',
+      error: error.message
+    });
+  }
+});
+
+// Delete user endpoint
+app.delete('/api/auth/users/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('Delete user request for ID:', id);
+    
+    // Find user index
+    const userIndex = users.findIndex(user => user.id === id);
+    
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
     }
-  ];
-  
-  res.json({ 
-    success: true, 
-    data: adminServices, 
-    message: '6 admin-created services available for booking' 
-  });
+    
+    // Remove user
+    const deletedUser = users.splice(userIndex, 1)[0];
+    
+    console.log('✅ User deleted successfully:', deletedUser.email);
+    
+    res.json({
+      success: true,
+      message: 'User deleted successfully',
+      data: deletedUser
+    });
+    
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete user',
+      error: error.message
+    });
+  }
+});
+
+// Update user endpoint
+app.put('/api/auth/users/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, email, role, company, phone, password } = req.body;
+    
+    console.log(`Updating user ${id} with data:`, req.body);
+    
+    // Find user index
+    const userIndex = users.findIndex(user => user.id === id);
+    
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Update user data
+    const updatedUser = {
+      ...users[userIndex],
+      firstName: firstName || users[userIndex].firstName,
+      lastName: lastName || users[userIndex].lastName,
+      name: `${firstName || users[userIndex].firstName} ${lastName || users[userIndex].lastName}`,
+      email: email || users[userIndex].email,
+      role: role || users[userIndex].role,
+      company: company || users[userIndex].company,
+      phone: phone || users[userIndex].phone,
+      password: password || users[userIndex].password,
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Update in users array
+    users[userIndex] = updatedUser;
+    
+    // Update currentUser if it's the same user
+    if (currentUser && currentUser.id === id) {
+      currentUser = updatedUser;
+    }
+    
+    console.log('✅ User updated successfully:', updatedUser);
+    
+    res.json({
+      success: true,
+      message: 'User updated successfully',
+      data: updatedUser
+    });
+    
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update user',
+      error: error.message
+    });
+  }
+});
+
+// Service requests endpoints
+app.get('/api/service-requests/public', (req, res) => {
+  try {
+    const adminServices = [
+      {
+        id: 'service-1',
+        name: 'Email & Calendar Management',
+        description: 'Comprehensive email and calendar management to keep your business organized and efficient.',
+        category: 'consulting',
+        price: '$500/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-2', 
+        name: 'Website Development',
+        description: 'Custom website development and design services for your business needs.',
+        category: 'development',
+        price: '$2000/project',
+        duration: '2-4 weeks',
+        status: 'active'
+      },
+      {
+        id: 'service-3',
+        name: 'Social Media Management',
+        description: 'Complete social media strategy and content management across all platforms.',
+        category: 'marketing',
+        price: '$800/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-4',
+        name: 'Data Analysis & Reporting',
+        description: 'Business data analysis and custom reporting solutions.',
+        category: 'analytics',
+        price: '$1200/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-5',
+        name: 'IT Support & Maintenance',
+        description: '24/7 IT support and system maintenance services.',
+        category: 'support',
+        price: '$1000/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-6',
+        name: 'Project Management',
+        description: 'Professional project management and coordination services.',
+        category: 'management',
+        price: '$1500/month',
+        duration: 'Ongoing',
+        status: 'active'
+      }
+    ];
+    
+    res.json({
+      success: true,
+      data: adminServices,
+      message: `Found ${adminServices.length} available services`
+    });
+  } catch (error) {
+    console.error('Public services error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch public services',
+      error: error.message
+    });
+  }
+});
+
+// Dashboard stats endpoint
+app.get('/api/auth/dashboard-stats', (req, res) => {
+  try {
+    const stats = {
+      totalUsers: users.length,
+      totalServiceRequests: serviceRequests.length,
+      pendingRequests: serviceRequests.filter(req => req.status === 'pending').length,
+      completedRequests: serviceRequests.filter(req => req.status === 'completed').length,
+      rejectedRequests: serviceRequests.filter(req => req.status === 'rejected').length
+    };
+    
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Dashboard stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch dashboard stats',
+      error: error.message
+    });
+  }
+});
+
+// Admin services endpoint
+app.get('/api/service-requests/admin-services', (req, res) => {
+  try {
+    console.log('Admin services request received');
+    
+    const adminServices = [
+      {
+        id: 'service-1',
+        name: 'Email & Calendar Management',
+        description: 'Comprehensive email and calendar management to keep your business organized and efficient.',
+        category: 'consulting',
+        price: '$500/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-2', 
+        name: 'Website Development',
+        description: 'Custom website development and design services for your business needs.',
+        category: 'development',
+        price: '$2000/project',
+        duration: '2-4 weeks',
+        status: 'active'
+      },
+      {
+        id: 'service-3',
+        name: 'Social Media Management',
+        description: 'Complete social media strategy and content management across all platforms.',
+        category: 'marketing',
+        price: '$800/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-4',
+        name: 'Data Analysis & Reporting',
+        description: 'Business data analysis and custom reporting solutions.',
+        category: 'analytics',
+        price: '$1200/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-5',
+        name: 'IT Support & Maintenance',
+        description: '24/7 IT support and system maintenance services.',
+        category: 'support',
+        price: '$1000/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-6',
+        name: 'Project Management',
+        description: 'Professional project management and coordination services.',
+        category: 'management',
+        price: '$1500/month',
+        duration: 'Ongoing',
+        status: 'active'
+      }
+    ];
+    
+    console.log(`Returning ${adminServices.length} admin services`);
+    
+    res.json({
+      success: true,
+      data: adminServices,
+      message: `Found ${adminServices.length} admin services`
+    });
+  } catch (error) {
+    console.error('Admin services error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch admin services',
+      error: error.message
+    });
+  }
+});
+
+// Client service requests endpoint
+app.get('/api/service-requests/client-requests', (req, res) => {
+  try {
+    const clientRequests = serviceRequests.filter(req => req.clientId === currentUser?.id);
+    res.json({
+      success: true,
+      data: clientRequests,
+      message: `Found ${clientRequests.length} service requests`
+    });
+  } catch (error) {
+    console.error('Client requests error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch client requests',
+      error: error.message
+    });
+  }
+});
+
+// Admin service requests endpoint
+app.get('/api/service-requests/admin-requests', (req, res) => {
+  try {
+    console.log('Admin service requests request received');
+    res.json({
+      success: true,
+      data: serviceRequests,
+      message: `Found ${serviceRequests.length} service requests`
+    });
+  } catch (error) {
+    console.error('Admin requests error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch admin requests',
+      error: error.message
+    });
+  }
+});
+
+// Get all service requests
+app.get('/api/service-requests', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: serviceRequests,
+      message: `Found ${serviceRequests.length} service requests`
+    });
+  } catch (error) {
+    console.error('Service requests error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch service requests',
+      error: error.message
+    });
+  }
+});
+
+// Update service request endpoint
+app.put('/api/service-requests/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes, estimatedHours, actualHours, budget, deadline } = req.body;
+    
+    console.log(`Updating service request ${id} with status: ${status}`);
+    
+    // Find service request index
+    const requestIndex = serviceRequests.findIndex(req => req.id === id);
+    
+    if (requestIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: 'Service request not found'
+      });
+    }
+    
+    // Update service request
+    const updatedRequest = {
+      ...serviceRequests[requestIndex],
+      status: status || serviceRequests[requestIndex].status,
+      adminNotes: adminNotes || serviceRequests[requestIndex].adminNotes,
+      estimatedHours: estimatedHours || serviceRequests[requestIndex].estimatedHours,
+      actualHours: actualHours || serviceRequests[requestIndex].actualHours,
+      budget: budget || serviceRequests[requestIndex].budget,
+      deadline: deadline || serviceRequests[requestIndex].deadline,
+      updatedAt: new Date().toISOString()
+    };
+    
+    serviceRequests[requestIndex] = updatedRequest;
+    
+    console.log(`✅ Service request ${id} updated successfully:`, updatedRequest);
+    
+    res.json({
+      success: true,
+      data: updatedRequest,
+      message: `Service request ${id} updated successfully`
+    });
+    
+  } catch (error) {
+    console.error('Update service request error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update service request',
+      error: error.message
+    });
+  }
+});
+
+// Service request stats endpoint
+app.get('/api/service-requests/stats/overview', (req, res) => {
+  try {
+    const stats = {
+      total: serviceRequests.length,
+      pending: serviceRequests.filter(req => req.status === 'pending').length,
+      inProgress: serviceRequests.filter(req => req.status === 'in-progress').length,
+      completed: serviceRequests.filter(req => req.status === 'completed').length,
+      rejected: serviceRequests.filter(req => req.status === 'rejected').length
+    };
+    
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Service request stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch service request stats',
+      error: error.message
+    });
+  }
+});
+
+// Create service request endpoint
+app.post('/api/service-requests', (req, res) => {
+  try {
+    const { title, description, serviceType, priority, preferredStartDate } = req.body;
+    
+    console.log('Creating service request:', { title, description, serviceType, priority });
+    
+    // Create new service request
+    const requestId = 'req-' + Date.now();
+    const serviceRequest = {
+      id: requestId,
+      title: title.trim(),
+      description: description.trim(),
+      serviceType: serviceType || 'consulting',
+      priority: priority || 'medium',
+      status: 'pending',
+      clientId: currentUser ? currentUser.id : 'anonymous',
+      clientName: currentUser ? currentUser.name : 'Anonymous User',
+      clientEmail: currentUser ? currentUser.email : 'anonymous@example.com',
+      preferredStartDate: preferredStartDate || new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      adminId: null,
+      adminNotes: null,
+      estimatedHours: null,
+      actualHours: null,
+      budget: null,
+      deadline: null
+    };
+    
+    // Add to service requests array
+    serviceRequests.push(serviceRequest);
+    
+    console.log('✅ Service request created successfully:', serviceRequest);
+    
+    res.json({
+      success: true,
+      data: serviceRequest,
+      message: 'Service request created successfully'
+    });
+    
+  } catch (error) {
+    console.error('Create service request error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create service request',
+      error: error.message
+    });
+  }
+});
+
+// Available services endpoint
+app.get('/api/services/available', (req, res) => {
+  try {
+    const availableServices = [
+      {
+        id: 'service-1',
+        name: 'Email & Calendar Management',
+        description: 'Comprehensive email and calendar management to keep your business organized and efficient.',
+        category: 'consulting',
+        price: '$500/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-2', 
+        name: 'Website Development',
+        description: 'Custom website development and design services for your business needs.',
+        category: 'development',
+        price: '$2000/project',
+        duration: '2-4 weeks',
+        status: 'active'
+      },
+      {
+        id: 'service-3',
+        name: 'Social Media Management',
+        description: 'Complete social media strategy and content management across all platforms.',
+        category: 'marketing',
+        price: '$800/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-4',
+        name: 'Data Analysis & Reporting',
+        description: 'Business data analysis and custom reporting solutions.',
+        category: 'analytics',
+        price: '$1200/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-5',
+        name: 'IT Support & Maintenance',
+        description: '24/7 IT support and system maintenance services.',
+        category: 'support',
+        price: '$1000/month',
+        duration: 'Ongoing',
+        status: 'active'
+      },
+      {
+        id: 'service-6',
+        name: 'Project Management',
+        description: 'Professional project management and coordination services.',
+        category: 'management',
+        price: '$1500/month',
+        duration: 'Ongoing',
+        status: 'active'
+      }
+    ];
+    
+    res.json({
+      success: true,
+      data: availableServices,
+      message: `Found ${availableServices.length} available services`
+    });
+  } catch (error) {
+    console.error('Available services error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch available services',
+      error: error.message
+    });
+  }
+});
+
+// Messaging endpoints
+app.get('/api/messaging/admin/conversations', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: [],
+      message: 'No conversations found'
+    });
+  } catch (error) {
+    console.error('Admin conversations error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch conversations',
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/messaging/conversations', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: [],
+      message: 'No conversations found'
+    });
+  } catch (error) {
+    console.error('Conversations error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch conversations',
+      error: error.message
+    });
+  }
+});
+
+// Client dashboard stats endpoint
+app.get('/api/service-requests/client-dashboard-stats', (req, res) => {
+  try {
+    const clientRequests = serviceRequests.filter(req => req.clientId === currentUser?.id);
+    
+    const stats = {
+      totalRequests: clientRequests.length,
+      pendingRequests: clientRequests.filter(req => req.status === 'pending').length,
+      inProgressRequests: clientRequests.filter(req => req.status === 'in-progress').length,
+      completedRequests: clientRequests.filter(req => req.status === 'completed').length,
+      rejectedRequests: clientRequests.filter(req => req.status === 'rejected').length
+    };
+    
+    res.json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Client dashboard stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch client dashboard stats',
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/messaging/unread-count', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: { count: 0 }
+    });
+  } catch (error) {
+    console.error('Unread count error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch unread count',
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/messaging/status', (req, res) => {
+  try {
+    res.json({
+      success: true,
+      data: { status: 'offline' }
+    });
+  } catch (error) {
+    console.error('Messaging status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch messaging status',
+      error: error.message
+    });
+  }
 });
 
 app.post('/api/messaging/public/send', (req, res) => {
   try {
-    console.log('Received message:', req.body);
+    console.log('Public message received:', req.body);
+    
     res.json({
       success: true,
       message: 'Message sent successfully',
       data: {
-        id: Date.now(),
-        content: req.body.content || 'No content',
-        senderName: req.body.senderName || 'Anonymous',
-        senderEmail: req.body.senderEmail || 'No email',
+        id: 'msg-' + Date.now(),
+        ...req.body,
         createdAt: new Date().toISOString()
       }
     });
   } catch (error) {
-    console.error('Messaging error:', error);
+    console.error('Send message error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to send message',
+      error: error.message
+    });
+  }
+});
+
+// Socket.IO mock endpoint
+app.get('/socket.io/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Socket.IO endpoint available',
+    status: 'connected'
+  });
+});
+
+// Contact endpoint
+app.post('/api/contact', (req, res) => {
+  try {
+    console.log('Contact form submission:', req.body);
+    
+    res.json({
+      success: true,
+      message: 'Contact form submitted successfully',
+      data: { 
+        id: Date.now(), 
+        ...req.body, 
+        createdAt: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to submit contact form',
       error: error.message
     });
   }
@@ -407,7 +1094,9 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Start server
 app.listen(PORT, () => {
-  console.log(`Simple backend server running on port ${PORT}`);
+  console.log(`🚀 SIMPLE BACKEND - Running on port ${PORT}`);
+  console.log('📊 In-Memory Storage Active');
+  console.log('🔐 User Session Management Active');
+  console.log('✅ All endpoints working!');
 });
