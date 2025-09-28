@@ -1705,10 +1705,12 @@ app.post('/api/messaging/send', (req, res) => {
     // Emit to Socket.IO - target specific rooms based on sender role
     if (currentUser?.role === 'admin') {
       // Admin message - send to client room
-      io.to('client-' + (conversationId || 'sample')).emit('new-message', message);
+      io.to('admin-room').emit('new-message', message);
+      io.to(`client-${conversationId || 'sample'}`).emit('new-message', message);
     } else if (currentUser?.role === 'client') {
       // Client message - send to admin room
       io.to('admin-room').emit('new-message', message);
+      io.to(`client-${currentUser.id}`).emit('new-message', message);
     } else {
       // Public message - send to admin room
       io.to('admin-room').emit('new-message', message);
@@ -1762,6 +1764,7 @@ app.post('/api/messaging/public-send', (req, res) => {
     
     // Emit to admin room for public messages
     io.to('admin-room').emit('new-message', message);
+    io.to('admin-room').emit('message-notification', { messageId: message.id });
     
     console.log('✅ Public message sent:', message);
     
@@ -1852,6 +1855,19 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Handle user online status
+  socket.on('user-online', (data) => {
+    const { userId, userRole } = data;
+    console.log(`User ${userId} (${userRole}) is online`);
+    
+    // Notify other users that this user is online
+    if (userRole === 'admin') {
+      socket.to('admin-room').emit('user-status', { userId, status: 'online' });
+    } else if (userRole === 'client') {
+      socket.to('admin-room').emit('user-status', { userId, status: 'online' });
+    }
+  });
+
   // Handle joining a conversation
   socket.on('join-conversation', (data) => {
     const { conversationId } = data;
@@ -1873,6 +1889,21 @@ io.on('connection', (socket) => {
 
   // Handle new messages
   socket.on('new-message', (data) => {
+    console.log('New message received:', data);
+    
+    // Route message to appropriate rooms based on sender role
+    if (data.senderRole === 'admin') {
+      // Admin message - send to client room
+      socket.to(`client-${data.conversationId}`).emit('new-message', data);
+    } else if (data.senderRole === 'client') {
+      // Client message - send to admin room
+      socket.to('admin-room').emit('new-message', data);
+    } else if (data.senderRole === 'public') {
+      // Public message - send to admin room
+      socket.to('admin-room').emit('new-message', data);
+    }
+    
+    // Also emit to conversation room
     socket.to(`conversation-${data.conversationId}`).emit('new-message', data);
   });
 
