@@ -1710,10 +1710,11 @@ app.post('/api/messaging/send', (req, res) => {
     
     // Emit to Socket.IO - target specific rooms based on sender role
     if (currentUser?.role === 'admin') {
-      // Admin message - broadcast to all clients (NOT to admin room to avoid self-receipt)
+      // Admin message - send to client rooms only (NOT to admin room to avoid self-receipt)
+      // This ensures admin messages appear as "sent" in client portal
       io.emit('new-message', message); // Broadcast to all connected clients
     } else if (currentUser?.role === 'client') {
-      // Client message - send to admin room
+      // Client message - send to admin room only
       io.to('admin-room').emit('new-message', message);
     } else {
       // Public message - send to admin room
