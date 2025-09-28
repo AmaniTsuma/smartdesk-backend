@@ -1708,18 +1708,8 @@ app.post('/api/messaging/send', (req, res) => {
     
     console.log('🔍 Created message:', JSON.stringify(message, null, 2));
     
-    // Emit to Socket.IO - target specific rooms based on sender role
-    if (currentUser?.role === 'admin') {
-      // Admin message - send to client rooms only (NOT to admin room to avoid self-receipt)
-      // This ensures admin messages appear as "sent" in client portal
-      io.emit('new-message', message); // Broadcast to all connected clients
-    } else if (currentUser?.role === 'client') {
-      // Client message - send to admin room only
-      io.to('admin-room').emit('new-message', message);
-    } else {
-      // Public message - send to admin room
-      io.to('admin-room').emit('new-message', message);
-    }
+    // Simple message broadcasting - let frontend handle styling
+    io.emit('new-message', message); // Broadcast to all connected clients
     
     console.log('✅ Message sent:', message);
     
@@ -1897,28 +1887,11 @@ io.on('connection', (socket) => {
     socket.to(`conversation-${data.conversationId}`).emit('user-typing', data);
   });
 
-  // Handle new messages (this is for direct socket messages, not API messages)
+  // Handle direct socket messages (not API messages)
   socket.on('new-message', (data) => {
     console.log('✅ Direct socket message received:', data);
-    console.log('✅ Message sender role:', data.senderRole);
-    
-    // Route message to appropriate rooms based on sender role
-    if (data.senderRole === 'admin') {
-      // Admin message - broadcast to all clients
-      console.log('✅ Broadcasting admin message to all clients');
-      socket.broadcast.emit('new-message', data); // Broadcast to all connected clients
-    } else if (data.senderRole === 'client') {
-      // Client message - send to admin room
-      console.log('✅ Sending client message to admin room');
-      socket.to('admin-room').emit('new-message', data);
-    } else if (data.senderRole === 'public') {
-      // Public message - send to admin room
-      console.log('✅ Sending public message to admin room');
-      socket.to('admin-room').emit('new-message', data);
-    }
-    
-    // Also emit to conversation room
-    socket.to(`conversation-${data.conversationId}`).emit('new-message', data);
+    // Just broadcast to all clients - no complex routing
+    socket.broadcast.emit('new-message', data);
   });
 
   // Handle disconnect
