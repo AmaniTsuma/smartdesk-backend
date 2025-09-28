@@ -1841,17 +1841,21 @@ app.post('/api/messaging/public/send', (req, res) => {
 
 // Socket.IO server implementation
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
+  console.log('✅ User connected:', socket.id);
+  console.log('✅ Socket auth:', socket.handshake.auth);
+  console.log('✅ Socket headers:', socket.handshake.headers);
 
   // Handle user joining their room
   socket.on('join-user-room', (data) => {
     const { userId, userRole } = data;
-    console.log(`User ${userId} (${userRole}) joining room`);
+    console.log(`✅ User ${userId} (${userRole}) joining room`);
     
     if (userRole === 'admin') {
       socket.join('admin-room');
+      console.log('✅ Admin joined admin-room');
     } else if (userRole === 'client') {
       socket.join(`client-${userId}`);
+      console.log(`✅ Client joined client-${userId}`);
     }
   });
 
@@ -1889,18 +1893,22 @@ io.on('connection', (socket) => {
 
   // Handle new messages
   socket.on('new-message', (data) => {
-    console.log('New message received:', data);
+    console.log('✅ New message received:', data);
+    console.log('✅ Message sender role:', data.senderRole);
     
     // Route message to appropriate rooms based on sender role
     if (data.senderRole === 'admin') {
       // Admin message - send to all client rooms and admin room
+      console.log('✅ Broadcasting admin message to all clients');
       socket.to('admin-room').emit('new-message', data);
       socket.broadcast.emit('new-message', data); // Broadcast to all connected clients
     } else if (data.senderRole === 'client') {
       // Client message - send to admin room
+      console.log('✅ Sending client message to admin room');
       socket.to('admin-room').emit('new-message', data);
     } else if (data.senderRole === 'public') {
       // Public message - send to admin room
+      console.log('✅ Sending public message to admin room');
       socket.to('admin-room').emit('new-message', data);
     }
     
