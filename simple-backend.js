@@ -1690,9 +1690,9 @@ app.post('/api/messaging/send', (req, res) => {
     const message = {
       id: 'msg-' + Date.now(),
       senderId: currentUser?.id,
-      senderName: currentUser?.name,
+      senderName: currentUser?.name || currentUser?.firstName + ' ' + currentUser?.lastName,
       senderEmail: currentUser?.email,
-      senderRole: currentUser?.role,
+      senderRole: currentUser?.role || 'public',
       content: content,
       messageType: messageType,
       conversationId: conversationId || 'conv-sample-1',
@@ -1702,8 +1702,17 @@ app.post('/api/messaging/send', (req, res) => {
       updatedAt: new Date().toISOString()
     };
     
-    // Emit to Socket.IO
-    io.emit('new-message', message);
+    // Emit to Socket.IO - target specific rooms based on sender role
+    if (currentUser?.role === 'admin') {
+      // Admin message - send to client room
+      io.to('client-' + (conversationId || 'sample')).emit('new-message', message);
+    } else if (currentUser?.role === 'client') {
+      // Client message - send to admin room
+      io.to('admin-room').emit('new-message', message);
+    } else {
+      // Public message - send to admin room
+      io.to('admin-room').emit('new-message', message);
+    }
     
     console.log('✅ Message sent:', message);
     
@@ -1714,6 +1723,55 @@ app.post('/api/messaging/send', (req, res) => {
     });
   } catch (error) {
     console.error('Error sending message:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send message',
+      error: error.message
+    });
+  }
+});
+
+// Public message endpoint (for non-logged-in users)
+app.post('/api/messaging/public-send', (req, res) => {
+  try {
+    console.log('Public message send request:', req.body);
+    
+    const { content, senderName, senderEmail, messageType = 'text' } = req.body;
+    
+    if (!content || !senderName || !senderEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Content, sender name, and email are required'
+      });
+    }
+    
+    const message = {
+      id: 'msg-public-' + Date.now(),
+      senderId: 'public-' + Date.now(),
+      senderName: senderName,
+      senderEmail: senderEmail,
+      senderRole: 'public',
+      content: content,
+      messageType: messageType,
+      conversationId: 'conv-public-' + Date.now(),
+      isRead: false,
+      isDeleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Emit to admin room for public messages
+    io.to('admin-room').emit('new-message', message);
+    
+    console.log('✅ Public message sent:', message);
+    
+    res.json({
+      success: true,
+      message: 'Message sent successfully',
+      data: message
+    });
+  } catch (error) {
+    console.error('Error sending public message:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to send message',
