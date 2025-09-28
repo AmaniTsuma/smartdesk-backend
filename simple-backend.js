@@ -1687,10 +1687,7 @@ app.post('/api/messaging/send', (req, res) => {
       });
     }
     
-    console.log('🔍 Current user when sending message:', currentUser);
-    console.log('🔍 Current user role:', currentUser?.role);
-    console.log('🔍 Current user email:', currentUser?.email);
-    console.log('🔍 Message content:', content);
+    // Removed debugging logs that might cause issues
     
     const message = {
       id: 'msg-' + Date.now(),
@@ -1707,7 +1704,7 @@ app.post('/api/messaging/send', (req, res) => {
       updatedAt: new Date().toISOString()
     };
     
-    console.log('🔍 Created message:', JSON.stringify(message, null, 2));
+    // Message created successfully
     
     // Simple message broadcasting - let frontend handle styling
     io.emit('new-message', message); // Broadcast to all connected clients
