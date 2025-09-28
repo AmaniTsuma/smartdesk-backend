@@ -1485,24 +1485,37 @@ app.get('/api/messaging/admin/conversations', (req, res) => {
   // Return sample conversations including contact form submissions
   const conversations = [
     {
-      id: 'contact-1',
-      type: 'contact_form',
-      senderName: 'Contact Form',
-      senderEmail: 'contact@smartdesk.solutions',
-      lastMessage: 'New contact form submission received',
-      unreadCount: 1,
+      id: 'conv-sample-1',
+      participants: [
+        {
+          userId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+          userName: 'Amani John Tsuma',
+          userEmail: 'amanijohntsuma1@gmail.com',
+          userRole: 'client',
+          joinedAt: new Date().toISOString(),
+          isActive: true
+        }
+      ],
+      conversationType: 'client-admin',
+      title: 'Client Support',
+      isActive: true,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: 'live-chat-1',
-      type: 'live_chat',
-      senderName: 'Live Chat User',
-      senderEmail: 'user@example.com',
-      lastMessage: 'Hello, I need help with my services',
-      unreadCount: 0,
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-      updatedAt: new Date(Date.now() - 1800000).toISOString()
+      updatedAt: new Date().toISOString(),
+      lastMessage: {
+        id: 'msg-sample-1',
+        senderId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+        senderName: 'Amani John Tsuma',
+        senderEmail: 'amanijohntsuma1@gmail.com',
+        senderRole: 'client',
+        content: 'hey',
+        messageType: 'text',
+        conversationId: 'conv-sample-1',
+        isRead: false,
+        isDeleted: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      lastMessageAt: new Date().toISOString()
     }
   ];
 
@@ -1513,10 +1526,57 @@ app.get('/api/messaging/admin/conversations', (req, res) => {
 });
 
 app.get('/api/messaging/conversations', (req, res) => {
-  res.json({
-    success: true,
-    data: []
-  });
+  try {
+    // Return conversations for current user
+    const userConversations = [
+      {
+        id: 'conv-sample-1',
+        participants: [
+          {
+            userId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+            userName: 'Amani John Tsuma',
+            userEmail: 'amanijohntsuma1@gmail.com',
+            userRole: 'client',
+            joinedAt: new Date().toISOString(),
+            isActive: true
+          }
+        ],
+        conversationType: 'client-admin',
+        title: 'Client Support',
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        lastMessage: {
+          id: 'msg-sample-1',
+          senderId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+          senderName: 'Amani John Tsuma',
+          senderEmail: 'amanijohntsuma1@gmail.com',
+          senderRole: 'client',
+          content: 'hey',
+          messageType: 'text',
+          conversationId: 'conv-sample-1',
+          isRead: false,
+          isDeleted: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        lastMessageAt: new Date().toISOString()
+      }
+    ];
+    
+    res.json({
+      success: true,
+      data: userConversations,
+      total: userConversations.length
+    });
+  } catch (error) {
+    console.error('Error fetching conversations:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch conversations',
+      error: error.message
+    });
+  }
 });
 
 // Client dashboard stats endpoint
@@ -1572,9 +1632,113 @@ app.get('/api/messaging/unread-count', (req, res) => {
   res.json({
     success: true,
     data: {
-      unreadCount: 0
+      unreadCount: 1
     }
   });
+});
+
+// Get conversation messages
+app.get('/api/messaging/conversations/:id/messages', (req, res) => {
+  try {
+    const { id } = req.params;
+    const conversationMessages = [
+      {
+        id: 'msg-sample-1',
+        senderId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+        senderName: 'Amani John Tsuma',
+        senderEmail: 'amanijohntsuma1@gmail.com',
+        senderRole: 'client',
+        content: 'hey',
+        messageType: 'text',
+        conversationId: id,
+        isRead: false,
+        isDeleted: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    ];
+    
+    res.json({
+      success: true,
+      data: conversationMessages,
+      total: conversationMessages.length
+    });
+  } catch (error) {
+    console.error('Error fetching conversation messages:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch conversation messages',
+      error: error.message
+    });
+  }
+});
+
+// Send message endpoint
+app.post('/api/messaging/send', (req, res) => {
+  try {
+    console.log('Message send request:', req.body);
+    
+    const { content, conversationId, recipientId, messageType = 'text' } = req.body;
+    
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message content is required'
+      });
+    }
+    
+    const message = {
+      id: 'msg-' + Date.now(),
+      senderId: currentUser?.id,
+      senderName: currentUser?.name,
+      senderEmail: currentUser?.email,
+      senderRole: currentUser?.role,
+      content: content,
+      messageType: messageType,
+      conversationId: conversationId || 'conv-sample-1',
+      isRead: false,
+      isDeleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Emit to Socket.IO
+    io.emit('new-message', message);
+    
+    console.log('✅ Message sent:', message);
+    
+    res.json({
+      success: true,
+      message: 'Message sent successfully',
+      data: message
+    });
+  } catch (error) {
+    console.error('Error sending message:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send message',
+      error: error.message
+    });
+  }
+});
+
+// Mark conversation as read
+app.put('/api/messaging/conversations/:id/read', (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    res.json({
+      success: true,
+      message: 'Conversation marked as read'
+    });
+  } catch (error) {
+    console.error('Error marking conversation as read:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to mark conversation as read',
+      error: error.message
+    });
+  }
 });
 
 // Mock Socket.IO connection status
