@@ -1687,6 +1687,9 @@ app.post('/api/messaging/send', (req, res) => {
       });
     }
     
+    console.log('🔍 Current user when sending message:', currentUser);
+    console.log('🔍 Current user role:', currentUser?.role);
+    
     const message = {
       id: 'msg-' + Date.now(),
       senderId: currentUser?.id,
@@ -1701,6 +1704,8 @@ app.post('/api/messaging/send', (req, res) => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
+    
+    console.log('🔍 Created message with senderRole:', message.senderRole);
     
     // Emit to Socket.IO - target specific rooms based on sender role
     if (currentUser?.role === 'admin') {
