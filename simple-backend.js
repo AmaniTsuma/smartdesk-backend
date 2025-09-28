@@ -1704,13 +1704,12 @@ app.post('/api/messaging/send', (req, res) => {
     
     // Emit to Socket.IO - target specific rooms based on sender role
     if (currentUser?.role === 'admin') {
-      // Admin message - send to client room
+      // Admin message - send to admin room and broadcast to all clients
       io.to('admin-room').emit('new-message', message);
-      io.to(`client-${conversationId || 'sample'}`).emit('new-message', message);
+      io.emit('new-message', message); // Broadcast to all connected clients
     } else if (currentUser?.role === 'client') {
       // Client message - send to admin room
       io.to('admin-room').emit('new-message', message);
-      io.to(`client-${currentUser.id}`).emit('new-message', message);
     } else {
       // Public message - send to admin room
       io.to('admin-room').emit('new-message', message);
@@ -1765,6 +1764,7 @@ app.post('/api/messaging/public-send', (req, res) => {
     // Emit to admin room for public messages
     io.to('admin-room').emit('new-message', message);
     io.to('admin-room').emit('message-notification', { messageId: message.id });
+    console.log('✅ Public message sent to admin room');
     
     console.log('✅ Public message sent:', message);
     
@@ -1893,8 +1893,9 @@ io.on('connection', (socket) => {
     
     // Route message to appropriate rooms based on sender role
     if (data.senderRole === 'admin') {
-      // Admin message - send to client room
-      socket.to(`client-${data.conversationId}`).emit('new-message', data);
+      // Admin message - send to all client rooms and admin room
+      socket.to('admin-room').emit('new-message', data);
+      socket.broadcast.emit('new-message', data); // Broadcast to all connected clients
     } else if (data.senderRole === 'client') {
       // Client message - send to admin room
       socket.to('admin-room').emit('new-message', data);
