@@ -1,8 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: 'https://smartdesk.solutions',
+    methods: ['GET', 'POST'],
+    credentials: true
+  }
+});
 const PORT = process.env.PORT || 3001;
 
 // Middleware - CORS configuration
@@ -1604,12 +1614,49 @@ app.post('/api/messaging/public/send', (req, res) => {
   }
 });
 
-// Socket.IO mock endpoint for live chat
-app.get('/socket.io/', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Socket.IO endpoint available',
-    status: 'connected'
+// Socket.IO server implementation
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  // Handle user joining their room
+  socket.on('join-user-room', (data) => {
+    const { userId, userRole } = data;
+    console.log(`User ${userId} (${userRole}) joining room`);
+    
+    if (userRole === 'admin') {
+      socket.join('admin-room');
+    } else if (userRole === 'client') {
+      socket.join(`client-${userId}`);
+    }
+  });
+
+  // Handle joining a conversation
+  socket.on('join-conversation', (data) => {
+    const { conversationId } = data;
+    socket.join(`conversation-${conversationId}`);
+    console.log(`User joined conversation ${conversationId}`);
+  });
+
+  // Handle leaving a conversation
+  socket.on('leave-conversation', (data) => {
+    const { conversationId } = data;
+    socket.leave(`conversation-${conversationId}`);
+    console.log(`User left conversation ${conversationId}`);
+  });
+
+  // Handle typing indicators
+  socket.on('user-typing', (data) => {
+    socket.to(`conversation-${data.conversationId}`).emit('user-typing', data);
+  });
+
+  // Handle new messages
+  socket.on('new-message', (data) => {
+    socket.to(`conversation-${data.conversationId}`).emit('new-message', data);
+  });
+
+  // Handle disconnect
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
   });
 });
 
@@ -1655,8 +1702,10 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-app.listen(PORT, () => {
+// Start server
+server.listen(PORT, () => {
   console.log(`🚀 FIXED BACKEND - Running on port ${PORT}`);
   console.log('📊 MySQL Database Connected');
   console.log('🔐 User Session Management Active');
+  console.log('🔌 Socket.IO Server Active');
 });
