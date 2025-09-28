@@ -1709,8 +1709,7 @@ app.post('/api/messaging/send', (req, res) => {
     
     // Emit to Socket.IO - target specific rooms based on sender role
     if (currentUser?.role === 'admin') {
-      // Admin message - send to admin room and broadcast to all clients
-      io.to('admin-room').emit('new-message', message);
+      // Admin message - broadcast to all clients (NOT to admin room to avoid self-receipt)
       io.emit('new-message', message); // Broadcast to all connected clients
     } else if (currentUser?.role === 'client') {
       // Client message - send to admin room
@@ -1896,16 +1895,15 @@ io.on('connection', (socket) => {
     socket.to(`conversation-${data.conversationId}`).emit('user-typing', data);
   });
 
-  // Handle new messages
+  // Handle new messages (this is for direct socket messages, not API messages)
   socket.on('new-message', (data) => {
-    console.log('✅ New message received:', data);
+    console.log('✅ Direct socket message received:', data);
     console.log('✅ Message sender role:', data.senderRole);
     
     // Route message to appropriate rooms based on sender role
     if (data.senderRole === 'admin') {
-      // Admin message - send to all client rooms and admin room
+      // Admin message - broadcast to all clients
       console.log('✅ Broadcasting admin message to all clients');
-      socket.to('admin-room').emit('new-message', data);
       socket.broadcast.emit('new-message', data); // Broadcast to all connected clients
     } else if (data.senderRole === 'client') {
       // Client message - send to admin room
