@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const server = createServer(app);
@@ -24,54 +26,219 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// In-memory storage for users
-let users = [
-  {
-    id: 'admin-1',
-    email: 'info@smartdesk.solutions',
-    firstName: 'Smart Desk',
-    lastName: 'Solutions',
-    name: 'Smart Desk Solutions',
-    role: 'admin',
-    isActive: true,
-    company: 'Smart Desk Solutions',
-    phone: '',
-    password: 'admin123',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
-    email: 'amanijohntsuma1@gmail.com',
-    firstName: 'Amani John',
-    lastName: 'Tsuma',
-    name: 'Amani John Tsuma',
-    role: 'client',
-    isActive: true,
-    company: 'AFRETEF',
-    phone: '0715896449',
-    password: 'amani123',
-    createdAt: '2025-09-20T12:29:41.597Z',
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: '29e8fe0c-dc5a-4897-8e9f-4afdcfcf808d',
-    email: 'admin@smartdesk.com',
-    firstName: 'Admin',
-    lastName: 'User',
-    name: 'Admin User',
-    role: 'admin',
-    isActive: true,
-    company: 'Smart Desk Solutions',
-    phone: '',
-    password: 'admin123',
-    createdAt: '2025-09-20T15:52:46.672Z',
-    updatedAt: new Date().toISOString()
-  }
-];
+// File-based persistence functions
+const DATA_DIR = path.join(__dirname, 'data');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const SERVICE_REQUESTS_FILE = path.join(DATA_DIR, 'service-requests.json');
+const CONVERSATIONS_FILE = path.join(DATA_DIR, 'conversations.json');
+const MESSAGES_FILE = path.join(DATA_DIR, 'messages.json');
 
-// In-memory storage for service requests
-let serviceRequests = [
+// Ensure data directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+// Load data from files
+function loadUsers() {
+  try {
+    if (fs.existsSync(USERS_FILE)) {
+      const data = fs.readFileSync(USERS_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error loading users:', error);
+  }
+  return [];
+}
+
+function saveUsers(usersArray) {
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(usersArray, null, 2));
+    console.log('✅ Users saved to file');
+  } catch (error) {
+    console.error('Error saving users:', error);
+  }
+}
+
+function loadServiceRequests() {
+  try {
+    if (fs.existsSync(SERVICE_REQUESTS_FILE)) {
+      const data = fs.readFileSync(SERVICE_REQUESTS_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error loading service requests:', error);
+  }
+  return [];
+}
+
+function saveServiceRequests(requestsArray) {
+  try {
+    fs.writeFileSync(SERVICE_REQUESTS_FILE, JSON.stringify(requestsArray, null, 2));
+    console.log('✅ Service requests saved to file');
+  } catch (error) {
+    console.error('Error saving service requests:', error);
+  }
+}
+
+function loadConversations() {
+  try {
+    if (fs.existsSync(CONVERSATIONS_FILE)) {
+      const data = fs.readFileSync(CONVERSATIONS_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error loading conversations:', error);
+  }
+  return [];
+}
+
+function saveConversations(conversationsArray) {
+  try {
+    fs.writeFileSync(CONVERSATIONS_FILE, JSON.stringify(conversationsArray, null, 2));
+    console.log('✅ Conversations saved to file');
+  } catch (error) {
+    console.error('Error saving conversations:', error);
+  }
+}
+
+function loadMessages() {
+  try {
+    if (fs.existsSync(MESSAGES_FILE)) {
+      const data = fs.readFileSync(MESSAGES_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error loading messages:', error);
+  }
+  return [];
+}
+
+function saveMessages(messagesArray) {
+  try {
+    fs.writeFileSync(MESSAGES_FILE, JSON.stringify(messagesArray, null, 2));
+    console.log('✅ Messages saved to file');
+  } catch (error) {
+    console.error('Error saving messages:', error);
+  }
+}
+
+// In-memory storage for users (with file persistence)
+let users = loadUsers();
+
+// If no users file exists, initialize with default users
+if (users.length === 0) {
+  users = [
+    {
+      id: 'admin-1',
+      email: 'info@smartdesk.solutions',
+      firstName: 'Smart Desk',
+      lastName: 'Solutions',
+      name: 'Smart Desk Solutions',
+      role: 'admin',
+      isActive: true,
+      company: 'Smart Desk Solutions',
+      phone: '',
+      password: 'admin123',
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+      email: 'amanijohntsuma1@gmail.com',
+      firstName: 'Amani John',
+      lastName: 'Tsuma',
+      name: 'Amani John Tsuma',
+      role: 'client',
+      isActive: true,
+      company: 'AFRETEF',
+      phone: '0715896449',
+      password: 'amani123',
+      createdAt: '2025-09-20T12:29:41.597Z',
+      updatedAt: new Date().toISOString()
+    }
+  ];
+  saveUsers(users); // Save initial users to file
+}
+
+// In-memory storage for service requests (with file persistence)
+let serviceRequests = loadServiceRequests();
+
+// If no service requests file exists, initialize with default requests
+if (serviceRequests.length === 0) {
+  serviceRequests = [
+    {
+      id: 'req-sample-1',
+      title: 'Email & Calendar Management',
+      description: 'Comprehensive email and calendar management to keep your business organized and efficient.',
+      serviceType: 'consulting',
+      priority: 'medium',
+      status: 'pending',
+      clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+      clientName: 'Amani John Tsuma',
+      clientEmail: 'amanijohntsuma1@gmail.com',
+      preferredStartDate: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      adminId: null,
+      adminNotes: null,
+      estimatedHours: null,
+      actualHours: null,
+      budget: null,
+      deadline: null,
+      category: 'consulting',
+      company: 'AFRETEF',
+      phone: '0715896449'
+    },
+    {
+      id: 'req-sample-2',
+      title: 'Data Entry & Reporting',
+      description: 'Accurate data handling and comprehensive weekly/monthly reports for informed business decisions.',
+      serviceType: 'analytics',
+      priority: 'high',
+      status: 'in-progress',
+      clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+      clientName: 'Amani John Tsuma',
+      clientEmail: 'amanijohntsuma1@gmail.com',
+      preferredStartDate: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      adminId: 'admin-1',
+      adminNotes: 'Initial setup complete, awaiting client feedback.',
+      estimatedHours: 40,
+      actualHours: 15,
+      budget: 2000,
+      deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      category: 'analytics',
+      company: 'AFRETEF',
+      phone: '0715896449'
+    },
+    {
+      id: 'req-sample-3',
+      title: 'Bookkeeping & Invoicing',
+      description: 'Professional expense tracking, invoice management, and financial reconciliation services.',
+      serviceType: 'finance',
+      priority: 'low',
+      status: 'completed',
+      clientId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+      clientName: 'Amani John Tsuma',
+      clientEmail: 'amanijohntsuma1@gmail.com',
+      preferredStartDate: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      adminId: 'admin-1',
+      adminNotes: 'Project completed successfully',
+      estimatedHours: 20,
+      actualHours: 18,
+      budget: 1000,
+      deadline: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+      category: 'finance',
+      company: 'AFRETEF',
+      phone: '0715896449'
+    }
+  ];
+  saveServiceRequests(serviceRequests); // Save initial service requests to file
+}
   {
     id: 'req-sample-1',
     title: 'Email & Calendar Management',
@@ -245,6 +412,9 @@ app.post('/api/auth/register', (req, res) => {
     
     // Add to users array
     users.push(newUser);
+    
+    // Save users to file
+    saveUsers(users);
     
     // Set as current user
     currentUser = newUser;
@@ -440,6 +610,9 @@ app.delete('/api/auth/users/:id', (req, res) => {
     
     // Remove user
     const deletedUser = users.splice(userIndex, 1)[0];
+    
+    // Save users to file
+    saveUsers(users);
     
     console.log('✅ User deleted successfully:', deletedUser.email);
     
@@ -800,6 +973,9 @@ app.put('/api/service-requests/:id', (req, res) => {
     
     serviceRequests[requestIndex] = updatedRequest;
     
+    // Save to file
+    saveServiceRequests(serviceRequests);
+    
     console.log(`✅ Service request ${id} updated successfully:`, updatedRequest);
     
     res.json({
@@ -875,6 +1051,9 @@ app.post('/api/service-requests', (req, res) => {
     
     // Add to service requests array
     serviceRequests.push(serviceRequest);
+    
+    // Save to file
+    saveServiceRequests(serviceRequests);
     
     console.log('✅ Service request created successfully:', serviceRequest);
     
@@ -1147,48 +1326,64 @@ app.post('/api/messaging/public/send', (req, res) => {
   }
 });
 
-// In-memory storage for messages and conversations
-let conversations = [
-  {
-    id: 'conv-sample-1',
-    participants: [
-      {
-        userId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
-        userName: 'Amani John Tsuma',
-        userEmail: 'amanijohntsuma1@gmail.com',
-        userRole: 'client',
-        joinedAt: new Date().toISOString(),
-        isActive: true
-      }
-    ],
-    conversationType: 'client-admin',
-    title: 'Client Support',
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
+// In-memory storage for messages and conversations (with file persistence)
+let conversations = loadConversations();
 
-let messages = [
-  {
-    id: 'msg-sample-1',
-    senderId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
-    senderName: 'Amani John Tsuma',
-    senderEmail: 'amanijohntsuma1@gmail.com',
-    senderRole: 'client',
-    content: 'hey',
-    messageType: 'text',
-    conversationId: 'conv-sample-1',
-    isRead: false,
-    isDeleted: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
+// If no conversations file exists, initialize with default conversation
+if (conversations.length === 0) {
+  conversations = [
+    {
+      id: 'conv-sample-1',
+      participants: [
+        {
+          userId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+          userName: 'Amani John Tsuma',
+          userEmail: 'amanijohntsuma1@gmail.com',
+          userRole: 'client',
+          joinedAt: new Date().toISOString(),
+          isActive: true
+        }
+      ],
+      conversationType: 'client-admin',
+      title: 'Client Support',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  ];
+  saveConversations(conversations);
+}
 
-// Update conversation with last message
-conversations[0].lastMessage = messages[0];
-conversations[0].lastMessageAt = messages[0].createdAt;
+let messages = loadMessages();
+
+// If no messages file exists, initialize with default message
+if (messages.length === 0) {
+  messages = [
+    {
+      id: 'msg-sample-1',
+      senderId: '59fe66a6-2f50-4272-b284-fbb3da05d9a0',
+      senderName: 'Amani John Tsuma',
+      senderEmail: 'amanijohntsuma1@gmail.com',
+      senderRole: 'client',
+      content: 'hey',
+      messageType: 'text',
+      conversationId: 'conv-sample-1',
+      isRead: false,
+      isDeleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  ];
+  
+  // Update conversation with last message
+  if (conversations.length > 0) {
+    conversations[0].lastMessage = messages[0];
+    conversations[0].lastMessageAt = messages[0].createdAt;
+    saveConversations(conversations);
+  }
+  
+  saveMessages(messages);
+}
 
 // Send message endpoint
 app.post('/api/messaging/send', (req, res) => {
@@ -1252,6 +1447,10 @@ app.post('/api/messaging/send', (req, res) => {
     conversation.lastMessageAt = message.createdAt;
     conversation.updatedAt = new Date().toISOString();
     
+    // Save to files
+    saveMessages(messages);
+    saveConversations(conversations);
+    
     // Emit message via Socket.IO
     io.emit('new-message', message);
     
@@ -1311,6 +1510,9 @@ app.put('/api/messaging/conversations/:id/read', (req, res) => {
         msg.isRead = true;
       }
     });
+    
+    // Save to file
+    saveMessages(messages);
     
     res.json({
       success: true,
