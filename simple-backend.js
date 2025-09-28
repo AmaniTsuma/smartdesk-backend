@@ -1690,6 +1690,7 @@ app.post('/api/messaging/send', (req, res) => {
     console.log('🔍 Current user when sending message:', currentUser);
     console.log('🔍 Current user role:', currentUser?.role);
     console.log('🔍 Current user email:', currentUser?.email);
+    console.log('🔍 Message content:', content);
     
     const message = {
       id: 'msg-' + Date.now(),
